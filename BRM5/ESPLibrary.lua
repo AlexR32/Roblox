@@ -108,7 +108,7 @@ end
 
 RunService.RenderStepped:Connect(function()
     for Index, ESP in pairs(ESPTable) do
-        if not ESP.Model then continue end
+        if not ESP.Model and not ESP.Config.BoxVisible and not ESP.Config.TextVisible then continue end
         local WorldPosition, OnScreen = nil, false
         if ESP.Mode == "Player" then
             if ESP.Model.Character and ESP.Model.Character.PrimaryPart then
