@@ -5,20 +5,13 @@ local LocalPlayer = PlayerService.LocalPlayer
 local ESPLibrary = {}
 local ESPTable = {}
 
-local function GetPlayerFromCharacter(Character)
-    return PlayerService[Character.Name]
-end
-local function GetCharacterFromPlayer(Player)
-    if Player.Character then
-        return Player.Character
+local function ColorManager(Player)
+    if LocalPlayer.Team == Player.Team then
+        return false, Player.TeamColor.Color
     end
-    return Player
+    return true, Player.TeamColor.Color
 end
 
-local function GetTeamColorFromCharacter(Character)
-    local Player = GetPlayerFromCharacter(Character)
-    return Player.TeamColor.Color
-end
 local function GetDistanceFromClient(Position)
     return LocalPlayer:DistanceFromCharacter(Position)
 end
@@ -106,10 +99,10 @@ function ESPLibrary.Remove(Model)
     end
 end
 
-RunService.RenderStepped:Connect(function()
+RunService.Heartbeat:Connect(function()
     for Index, ESP in pairs(ESPTable) do
         if not ESP.Model and not ESP.Config.BoxVisible and not ESP.Config.TextVisible then continue end
-        local WorldPosition, OnScreen = nil, false
+        local WorldPosition, OnScreen, InEnemyTeam, TeamColor = nil, false, false, ESP.Config.EnemyColor
         if ESP.Mode == "Player" then
             if ESP.Model.Character and ESP.Model.Character.PrimaryPart then
                 local Camera = Workspace.CurrentCamera
@@ -117,11 +110,16 @@ RunService.RenderStepped:Connect(function()
                 if OnScreen then
                     local Distance = GetDistanceFromClient(ESP.Model.Character.PrimaryPart.Position)
                     local Box = CalculateBox(ESP.Model.Character)
+                    InEnemyTeam,TeamColor = ColorManager(ESP.Model)
 
                     if ESP.Config.TeamColor then
-                        ESP.Drawing.Box.Main.Color = GetTeamColorFromCharacter(ESP.Model)
+                        ESP.Drawing.Box.Main.Color = TeamColor
                     else
-                        ESP.Drawing.Box.Main.Color = ESP.Config.Color
+                        if InEnemyTeam then
+                            ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
+                        else
+                            ESP.Drawing.Box.Main.Color = ESP.Config.AllyColor
+                        end
                     end
 
                     ESP.Drawing.Box.Main.Size = Box.ScreenSize
@@ -141,7 +139,7 @@ RunService.RenderStepped:Connect(function()
                     local Distance = GetDistanceFromClient(ESP.Model.PrimaryPart.Position)
                     local Box = CalculateBox(ESP.Model)
 
-                    ESP.Drawing.Box.Main.Color = ESP.Config.Color
+                    ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
                     ESP.Drawing.Box.Main.Size = Box.ScreenSize
                     ESP.Drawing.Box.Main.Position = Box.ScreenPosition
                     ESP.Drawing.Box.Outline.Size = Box.ScreenSize
@@ -152,9 +150,15 @@ RunService.RenderStepped:Connect(function()
                 end
             end
         end
-        ESP.Drawing.Box.Main.Visible = (OnScreen and ESP.Config.BoxVisible) or false
-        ESP.Drawing.Box.Outline.Visible = ESP.Drawing.Box.Main.Visible
-        ESP.Drawing.Text.Visible = (OnScreen and ESP.Config.TextVisible) or false
+        if ESP.Config.IsEnemy then
+            ESP.Drawing.Box.Main.Visible = (OnScreen and InEnemyTeam and ESP.Config.BoxVisible) or false
+            ESP.Drawing.Box.Outline.Visible = ESP.Drawing.Box.Main.Visible
+            ESP.Drawing.Text.Visible = (OnScreen and InEnemyTeam and ESP.Config.TextVisible) or false
+        else
+            ESP.Drawing.Box.Main.Visible = (OnScreen and ESP.Config.BoxVisible) or false
+            ESP.Drawing.Box.Outline.Visible = ESP.Drawing.Box.Main.Visible
+            ESP.Drawing.Text.Visible = (OnScreen and ESP.Config.TextVisible) or false
+        end
     end
 end)
 
