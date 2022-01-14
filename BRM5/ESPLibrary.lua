@@ -69,6 +69,14 @@ function ESPLibrary.Add(Mode, Model, Config)
                         Filled = false
                     })
                 },
+                HeadCircle = AddDrawing("Circle", {
+                    ZIndex = 1,
+                    Transparency = 1,
+                    Thickness = 1,
+                    NumSides = 100,
+                    Radius = 10,
+                    Filled = false
+                }),
                 Text = AddDrawing("Text", {
                     ZIndex = 1,
                     Transparency = 1,
@@ -101,64 +109,74 @@ end
 
 RunService.Heartbeat:Connect(function()
     for Index, ESP in pairs(ESPTable) do
-        if not ESP.Model and not ESP.Config.BoxVisible and not ESP.Config.TextVisible then continue end
-        local WorldPosition, OnScreen, InEnemyTeam, TeamColor = nil, false, false, ESP.Config.EnemyColor
+        local WorldPosition, OnScreen, InEnemyTeam, TeamColor = nil, false, false, nil
+
         if ESP.Mode == "Player" then
             if ESP.Model.Character and ESP.Model.Character.PrimaryPart then
                 local Camera = Workspace.CurrentCamera
                 WorldPosition, OnScreen = Camera:WorldToViewportPoint(ESP.Model.Character.PrimaryPart.Position)
+
                 if OnScreen then
-                    local Distance = GetDistanceFromClient(ESP.Model.Character.PrimaryPart.Position)
-                    local Box = CalculateBox(ESP.Model.Character)
                     InEnemyTeam,TeamColor = ColorManager(ESP.Model)
-
-                    if ESP.Config.TeamColor then
-                        ESP.Drawing.Box.Main.Color = TeamColor
-                    else
-                        if InEnemyTeam then
-                            ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
-                        else
-                            ESP.Drawing.Box.Main.Color = ESP.Config.AllyColor
-                        end
+                    if ESP.Model.Character:FindFirstChild("Head") and ESP.Drawing.HeadCircle.Visible then
+                        local HeadPosition = Camera:WorldToViewportPoint(ESP.Model.Character.Head.Position)
+                        ESP.Drawing.HeadCircle.Color = not ESP.Config.TeamColor and (InEnemyTeam and ESP.Config.EnemyColor or ESP.Config.AllyColor) or TeamColor
+                        ESP.Drawing.HeadCircle.Radius = ESP.Config.HeadCircleRadius
+                        ESP.Drawing.HeadCircle.NumSides = ESP.Config.HeadCircleNumSides
+                        ESP.Drawing.HeadCircle.Filled = ESP.Config.HeadCircleFilled
+                        ESP.Drawing.HeadCircle.Position = Vector2.new(HeadPosition.X,HeadPosition.Y)
                     end
+                    if ESP.Drawing.Box.Main.Visible or ESP.Drawing.Text.Visible then
+                        local Distance = GetDistanceFromClient(ESP.Model.Character.PrimaryPart.Position)
+                        local Box = CalculateBox(ESP.Model.Character)
 
-                    ESP.Drawing.Box.Main.Size = Box.ScreenSize
-                    ESP.Drawing.Box.Main.Position = Box.ScreenPosition
-                    ESP.Drawing.Box.Outline.Size = Box.ScreenSize
-                    ESP.Drawing.Box.Outline.Position = Box.ScreenPosition
+                        ESP.Drawing.Box.Main.Color = not ESP.Config.TeamColor and (InEnemyTeam and ESP.Config.EnemyColor or ESP.Config.AllyColor) or TeamColor
+                        ESP.Drawing.Box.Main.Size = Box.ScreenSize
+                        ESP.Drawing.Box.Main.Position = Box.ScreenPosition
+                        ESP.Drawing.Box.Outline.Size = Box.ScreenSize
+                        ESP.Drawing.Box.Outline.Position = Box.ScreenPosition
 
-                    ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Model.Name,Distance)
-                    ESP.Drawing.Text.Position = Vector2.new(Box.ScreenPosition.X + Box.ScreenSize.X/2, Box.ScreenPosition.Y + Box.ScreenSize.Y)
+                        ESP.Drawing.Text.Size = ESP.Config.TextSize
+                        ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Model.Name,Distance)
+                        ESP.Drawing.Text.Position = Vector2.new(Box.ScreenPosition.X + Box.ScreenSize.X/2, Box.ScreenPosition.Y + Box.ScreenSize.Y)
+                    end
                 end
             end
         else
             if ESP.Model:IsA("Model") and ESP.Model.PrimaryPart then
                 local Camera = Workspace.CurrentCamera
                 WorldPosition, OnScreen = Camera:WorldToViewportPoint(ESP.Model.PrimaryPart.Position)
+
                 if OnScreen then
-                    local Distance = GetDistanceFromClient(ESP.Model.PrimaryPart.Position)
-                    local Box = CalculateBox(ESP.Model)
+                    if ESP.Model:FindFirstChild("Head") and ESP.Drawing.HeadCircle.Visible then
+                        local HeadPosition = Camera:WorldToViewportPoint(ESP.Model.Head.Position)
+                        ESP.Drawing.HeadCircle.Color = ESP.Config.EnemyColor
+                        ESP.Drawing.HeadCircle.Radius = ESP.Config.HeadCircleRadius
+                        ESP.Drawing.HeadCircle.NumSides = ESP.Config.HeadCircleNumSides
+                        ESP.Drawing.HeadCircle.Filled = ESP.Config.HeadCircleFilled
+                        ESP.Drawing.HeadCircle.Position = Vector2.new(HeadPosition.X,HeadPosition.Y)
+                    end
+                    if ESP.Drawing.Box.Main.Visible or ESP.Drawing.Text.Visible then
+                        local Distance = GetDistanceFromClient(ESP.Model.PrimaryPart.Position)
+                        local Box = CalculateBox(ESP.Model)
 
-                    ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
-                    ESP.Drawing.Box.Main.Size = Box.ScreenSize
-                    ESP.Drawing.Box.Main.Position = Box.ScreenPosition
-                    ESP.Drawing.Box.Outline.Size = Box.ScreenSize
-                    ESP.Drawing.Box.Outline.Position = Box.ScreenPosition
+                        ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
+                        ESP.Drawing.Box.Main.Size = Box.ScreenSize
+                        ESP.Drawing.Box.Main.Position = Box.ScreenPosition
+                        ESP.Drawing.Box.Outline.Size = Box.ScreenSize
+                        ESP.Drawing.Box.Outline.Position = Box.ScreenPosition
 
-                    ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Config.Name,Distance)
-                    ESP.Drawing.Text.Position = Vector2.new(Box.ScreenPosition.X + Box.ScreenSize.X/2, Box.ScreenPosition.Y + Box.ScreenSize.Y)
+                        ESP.Drawing.Text.Size = ESP.Config.TextSize
+                        ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Config.Name,Distance)
+                        ESP.Drawing.Text.Position = Vector2.new(Box.ScreenPosition.X + Box.ScreenSize.X/2, Box.ScreenPosition.Y + Box.ScreenSize.Y)
+                    end
                 end
             end
         end
-        if ESP.Config.IsEnemy then
-            ESP.Drawing.Box.Main.Visible = (OnScreen and InEnemyTeam and ESP.Config.BoxVisible) or false
-            ESP.Drawing.Box.Outline.Visible = ESP.Drawing.Box.Main.Visible
-            ESP.Drawing.Text.Visible = (OnScreen and InEnemyTeam and ESP.Config.TextVisible) or false
-        else
-            ESP.Drawing.Box.Main.Visible = (OnScreen and ESP.Config.BoxVisible) or false
-            ESP.Drawing.Box.Outline.Visible = ESP.Drawing.Box.Main.Visible
-            ESP.Drawing.Text.Visible = (OnScreen and ESP.Config.TextVisible) or false
-        end
+        ESP.Drawing.Box.Main.Visible = ((OnScreen and not ESP.Config.IsEnemy and ESP.Config.BoxVisible) or false) or ((OnScreen and InEnemyTeam and ESP.Config.BoxVisible) or false)
+        ESP.Drawing.Box.Outline.Visible = ESP.Drawing.Box.Main.Visible
+        ESP.Drawing.HeadCircle.Visible = ((OnScreen and not ESP.Config.IsEnemy and ESP.Config.HeadCircleVisible) or false) or ((OnScreen and InEnemyTeam and ESP.Config.HeadCircleVisible) or false)
+        ESP.Drawing.Text.Visible = ((OnScreen and not ESP.Config.IsEnemy and ESP.Config.TextVisible) or false) or ((OnScreen and InEnemyTeam and ESP.Config.TextVisible) or false)
     end
 end)
 
