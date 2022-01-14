@@ -26,7 +26,11 @@ local function ShallowCopy(Table)
     if type(Table) == "table" then
         TableCopy = {}
         for Index,Value in pairs(Table) do
-            TableCopy[Index] = Value
+            if typeof(Value) == "table" then
+                TableCopy[Index] = ShallowCopy(Value)
+            else
+                TableCopy[Index] = Value
+            end
         end
     else
         TableCopy = Table
@@ -75,35 +79,13 @@ local function Compare(Table,Default)
             Compare(Default[Index],Value)
         end
     end
-    --return TableCopy
-    --[[
-    local TableCopy = ShallowCopy(Table)
-    for Index,Value in pairs(Default) do
-        if TableCopy[Index] == nil then
-            TableCopy[Index] = Value
-            print(tostring(Index) .. " added to config")
-        elseif typeof(Value) == "table" and typeof(TableCopy[Index]) == "table" then
-            Compare(TableCopy[Index],Value)
-        end
-    end
-    for Index,Value in pairs(TableCopy) do
-        if Default[Index] == nil then
-            print(tostring(Index) .. " removed from config")
-            TableCopy[Index] = nil
-        elseif typeof(Value) == "table" and typeof(Default[Index]) == "table" then
-            print(Default[Index],Value,"2")
-            Compare(Default[Index],Value)
-        end
-    end
-    return TableCopy
-    ]]
 end
 
 function ConfigSystem.WriteJSON(Table,Location)
     if not Table and not Location then return end
     local TableCopy = ShallowCopy(Table)
     Convert(TableCopy,"Write")
-    return writefile(Location, HttpService:JSONEncode(TableCopy))
+    writefile(Location, HttpService:JSONEncode(TableCopy))
 end
 
 function ConfigSystem.ReadJSON(Location,Default)
@@ -115,29 +97,3 @@ function ConfigSystem.ReadJSON(Location,Default)
 end
 
 return ConfigSystem
-
---[[
-local ConfigSystem = {}
-
-local repr = loadstring(game:HttpGet("https://raw.githubusercontent.com/Ozzypig/repr/master/repr.lua"))()
-local reprSettings = {
-    pretty = true,
-    semicolons = false,
-    sortKeys = true,
-    spaces = 4,
-    tabs = false,
-    robloxFullName = false,
-    robloxProperFullName = false,
-    robloxClassName = false
-}
-
-function ConfigSystem.WriteTable(Table,Location)
-    writefile(Location, "return " .. repr(Table,reprSettings))
-end
-
-function ConfigSystem.ReadTable(Location)
-    return loadfile(Location)()
-end
-
-return ConfigSystem
-]]
