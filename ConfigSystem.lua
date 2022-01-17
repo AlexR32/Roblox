@@ -27,6 +27,7 @@ local function ShallowCopy(Table)
         TableCopy = {}
         for Index,Value in pairs(Table) do
             if typeof(Value) == "table" then
+                print(Index)
                 TableCopy[Index] = ShallowCopy(Value)
             else
                 TableCopy[Index] = Value
