@@ -5,7 +5,7 @@ local LocalPlayer = PlayerService.LocalPlayer
 local ESPLibrary = {}
 local ESPTable = {}
 
-local function ColorManager(Player)
+function ColorManager(Player)
     if LocalPlayer.Team == Player.Team then
         return false, Player.TeamColor.Color
     end
@@ -45,6 +45,19 @@ local function CalculateBox(Model)
         ScreenSize = ScreenSize,
         OnScreen = OnScreen
     }
+end
+
+if game.PlaceId == 5565801610 or game.PlaceId == 5945728589 then
+    function ColorManager(Player)
+        if Player.Character and Player.Character:FindFirstChild("Team") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Team") then
+            if Player.Character.Team.Value ~= LocalPlayer.Character.Team.Value or Player.Character.Team.Value == "None" then
+                return true, Player.Character.Torso.Color
+            else
+                return false, Player.Character.Torso.Color
+            end
+        end
+        return true, Player.TeamColor.Color
+    end
 end
 
 function ESPLibrary.Add(Mode, Model, Config)
