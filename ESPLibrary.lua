@@ -58,7 +58,7 @@ local function CalculateBox(Model)
 end
 
 if game.PlaceId == 5565801610 or game.PlaceId == 5945728589 then
-    function Manager(Player)
+    function PlayerManager(Player)
         if Player.Character and Player.Character:FindFirstChild("Team") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Team") then
             if Player.Character.Team.Value ~= LocalPlayer.Character.Team.Value or Player.Character.Team.Value == "None" then
                 return true, Player.Character.Torso.Color
