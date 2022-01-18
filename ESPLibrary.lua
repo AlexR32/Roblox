@@ -5,11 +5,21 @@ local LocalPlayer = PlayerService.LocalPlayer
 local ESPLibrary = {}
 local ESPTable = {}
 
-function ColorManager(Player)
+function PlayerManager(Player)
+    local InEnemyTeam = true
+    local IsAlive = true
     if LocalPlayer.Team == Player.Team then
-        return false, Player.TeamColor.Color
+        InEnemyTeam = false
     end
-    return true, Player.TeamColor.Color
+    return InEnemyTeam, Player.TeamColor.Color
+end
+
+local function CharacterManager(Character)
+    local IsAlive = true
+    if Character and Character:FindFirstChildOfClass("Humanoid") then
+        IsAlive = Character:FindFirstChildOfClass("Humanoid").Health > 0
+    end
+    return IsAlive
 end
 
 local function GetDistanceFromClient(Position)
@@ -48,7 +58,7 @@ local function CalculateBox(Model)
 end
 
 if game.PlaceId == 5565801610 or game.PlaceId == 5945728589 then
-    function ColorManager(Player)
+    function Manager(Player)
         if Player.Character and Player.Character:FindFirstChild("Team") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Team") then
             if Player.Character.Team.Value ~= LocalPlayer.Character.Team.Value or Player.Character.Team.Value == "None" then
                 return true, Player.Character.Torso.Color
@@ -122,7 +132,7 @@ end
 
 RunService.Heartbeat:Connect(function()
     for Index, ESP in pairs(ESPTable) do
-        local WorldPosition, OnScreen, InEnemyTeam, TeamColor = nil, false, false, nil
+        local WorldPosition, OnScreen, IsAlive, InEnemyTeam, TeamColor = nil, false, true, true, nil
 
         if ESP.Mode == "Player" then
             if ESP.Model.Character and ESP.Model.Character.PrimaryPart then
@@ -130,7 +140,8 @@ RunService.Heartbeat:Connect(function()
                 WorldPosition, OnScreen = Camera:WorldToViewportPoint(ESP.Model.Character.PrimaryPart.Position)
 
                 if OnScreen then
-                    InEnemyTeam,TeamColor = ColorManager(ESP.Model)
+                    InEnemyTeam,TeamColor = PlayerManager(ESP.Model)
+                    IsAlive = CharacterManager(ESP.Model.Character)
                     if ESP.Model.Character:FindFirstChild("Head") and ESP.Drawing.HeadCircle.Visible then
                         local HeadPosition = Camera:WorldToViewportPoint(ESP.Model.Character.Head.Position)
                         ESP.Drawing.HeadCircle.Color = not ESP.Config.TeamColor and (InEnemyTeam and ESP.Config.EnemyColor or ESP.Config.AllyColor) or TeamColor
@@ -161,6 +172,7 @@ RunService.Heartbeat:Connect(function()
                 WorldPosition, OnScreen = Camera:WorldToViewportPoint(ESP.Model.PrimaryPart.Position)
 
                 if OnScreen then
+                    IsAlive = CharacterManager(ESP.Model)
                     if ESP.Model:FindFirstChild("Head") and ESP.Drawing.HeadCircle.Visible then
                         local HeadPosition = Camera:WorldToViewportPoint(ESP.Model.Head.Position)
                         ESP.Drawing.HeadCircle.Color = ESP.Config.EnemyColor
@@ -186,10 +198,10 @@ RunService.Heartbeat:Connect(function()
                 end
             end
         end
-        ESP.Drawing.Box.Main.Visible = ((OnScreen and not ESP.Config.IsEnemy and ESP.Config.BoxVisible) or false) or ((OnScreen and InEnemyTeam and ESP.Config.BoxVisible) or false)
+        ESP.Drawing.Box.Main.Visible = (OnScreen and IsAlive and not ESP.Config.IsEnemy and ESP.Config.BoxVisible) or (OnScreen and IsAlive and InEnemyTeam and ESP.Config.BoxVisible)
         ESP.Drawing.Box.Outline.Visible = ESP.Drawing.Box.Main.Visible
-        ESP.Drawing.HeadCircle.Visible = ((OnScreen and not ESP.Config.IsEnemy and ESP.Config.HeadCircleVisible) or false) or ((OnScreen and InEnemyTeam and ESP.Config.HeadCircleVisible) or false)
-        ESP.Drawing.Text.Visible = ((OnScreen and not ESP.Config.IsEnemy and ESP.Config.TextVisible) or false) or ((OnScreen and InEnemyTeam and ESP.Config.TextVisible) or false)
+        ESP.Drawing.HeadCircle.Visible = (OnScreen and IsAlive and not ESP.Config.IsEnemy and ESP.Config.HeadCircleVisible) or (OnScreen and IsAlive and InEnemyTeam and ESP.Config.HeadCircleVisible)
+        ESP.Drawing.Text.Visible = (OnScreen and IsAlive and not ESP.Config.IsEnemy and ESP.Config.TextVisible) or (OnScreen and IsAlive and InEnemyTeam and ESP.Config.TextVisible)
     end
 end)
 
