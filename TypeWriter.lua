@@ -9,7 +9,7 @@ local function GetLongest(Number1,Number2)
 end
 
 
-function Module:Notification(Title,Text,Duration)
+function Module.Notification(Title,Text,Duration)
 	coroutine.wrap(function()
 		local CoreGui = game:GetService("CoreGui")
 		local Screen = CoreGui:FindFirstChild("NotificationScreen")
