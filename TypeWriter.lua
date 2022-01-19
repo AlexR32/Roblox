@@ -78,7 +78,7 @@ function Module.TypeWrite(Text,Duration,Duration2)
 			Message.MaxVisibleGraphemes = Index
 			task.wait(Duration2)
 		end
-		task.wait(Delay)
+		task.wait(Duration)
 		for _ in utf8.graphemes(DisplayText) do
 			Index = Index - 1
 			Message.MaxVisibleGraphemes = Index
