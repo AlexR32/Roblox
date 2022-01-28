@@ -146,7 +146,7 @@ function ESPLibrary.Remove(Model)
     end
 end
 
-RunService.RenderStepped:Connect(function()
+RunService.Heartbeat:Connect(function()
     for Index, ESP in pairs(ESPTable) do
         local WorldPosition, OnScreen, IsAlive, InEnemyTeam, TeamColor = nil, false, true, true, nil
 
