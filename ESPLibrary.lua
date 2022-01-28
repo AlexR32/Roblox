@@ -33,6 +33,7 @@ local function AddDrawing(Type, Properties)
     end
     return Drawing
 end
+--[[
 local function CalculateBox(Model)
     if not Model then return end
     local CFrame, Size = Model:GetBoundingBox()
@@ -55,6 +56,21 @@ local function CalculateBox(Model)
         ScreenSize = ScreenSize,
         OnScreen = OnScreen
     }
+end
+]]
+
+local function CalculateBox(Model,Position,WorldPosition)
+    local Camera = Workspace.CurrentCamera
+    local Size = Model:GetExtentsSize()
+
+    local CornerTable = {
+        TopLeft = Camera:WorldToViewportPoint(Vector3.new(Position.X - Size.X * 0.5, Position.Y + Size.Y * 0.5, Position.Z)),
+        TopRight = Camera:WorldToViewportPoint(Vector3.new(Position.X + Size.X * 0.5, Position.Y + Size.Y * 0.5, Position.Z)),
+        BottomLeft = Camera:WorldToViewportPoint(Vector3.new(Position.X - Size.X * 0.5, Position.Y - Size.Y * 0.5, Position.Z)),
+        BottomRight = Camera:WorldToViewportPoint(Vector3.new(Position.X + Size.X * 0.5, Position.Y - Size.Y * 0.5, Position.Z))
+    }
+    local ScreenSize = Vector2.new((CornerTable.TopLeft - CornerTable.TopRight).Magnitude, (CornerTable.TopLeft - CornerTable.BottomLeft).Magnitude)
+    return Vector2.new(WorldPosition.X - ScreenSize.X * 0.5, WorldPosition.Y - ScreenSize.Y * 0.5), ScreenSize
 end
 
 if game.PlaceId == 5565801610 or game.PlaceId == 5945728589 then
@@ -130,7 +146,7 @@ function ESPLibrary.Remove(Model)
     end
 end
 
-RunService.Heartbeat:Connect(function()
+RunService.RenderStepped:Connect(function()
     for Index, ESP in pairs(ESPTable) do
         local WorldPosition, OnScreen, IsAlive, InEnemyTeam, TeamColor = nil, false, true, true, nil
 
@@ -142,7 +158,7 @@ RunService.Heartbeat:Connect(function()
                 if OnScreen then
                     InEnemyTeam,TeamColor = PlayerManager(ESP.Model)
                     IsAlive = CharacterManager(ESP.Model.Character)
-                    if ESP.Model.Character:FindFirstChild("Head") and ESP.Drawing.HeadCircle.Visible then
+                    if ESP.Drawing.HeadCircle.Visible and ESP.Model.Character:FindFirstChild("Head") then
                         local HeadPosition = Camera:WorldToViewportPoint(ESP.Model.Character.Head.Position)
                         ESP.Drawing.HeadCircle.Color = not ESP.Config.TeamColor and (InEnemyTeam and ESP.Config.EnemyColor or ESP.Config.AllyColor) or TeamColor
                         ESP.Drawing.HeadCircle.Radius = ESP.Config.HeadCircleRadius
@@ -151,18 +167,20 @@ RunService.Heartbeat:Connect(function()
                         ESP.Drawing.HeadCircle.Position = Vector2.new(HeadPosition.X,HeadPosition.Y)
                     end
                     if ESP.Drawing.Box.Main.Visible or ESP.Drawing.Text.Visible then
-                        local Distance = GetDistanceFromClient(ESP.Model.Character.PrimaryPart.Position)
-                        local Box = CalculateBox(ESP.Model.Character)
-
-                        ESP.Drawing.Box.Main.Color = not ESP.Config.TeamColor and (InEnemyTeam and ESP.Config.EnemyColor or ESP.Config.AllyColor) or TeamColor
-                        ESP.Drawing.Box.Main.Size = Box.ScreenSize
-                        ESP.Drawing.Box.Main.Position = Box.ScreenPosition
-                        ESP.Drawing.Box.Outline.Size = Box.ScreenSize
-                        ESP.Drawing.Box.Outline.Position = Box.ScreenPosition
-
-                        ESP.Drawing.Text.Size = ESP.Config.TextSize
-                        ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Model.Name,Distance)
-                        ESP.Drawing.Text.Position = Vector2.new(Box.ScreenPosition.X + Box.ScreenSize.X/2, Box.ScreenPosition.Y + Box.ScreenSize.Y)
+                        local ScreenPosition, ScreenSize = CalculateBox(ESP.Model.Character,ESP.Model.Character.PrimaryPart.CFrame.Position,WorldPosition)
+                        if ESP.Drawing.Box.Main.Visible then
+                            ESP.Drawing.Box.Main.Color = not ESP.Config.TeamColor and (InEnemyTeam and ESP.Config.EnemyColor or ESP.Config.AllyColor) or TeamColor
+                            ESP.Drawing.Box.Main.Size = ScreenSize
+                            ESP.Drawing.Box.Main.Position = ScreenPosition
+                            ESP.Drawing.Box.Outline.Size = ScreenSize
+                            ESP.Drawing.Box.Outline.Position = ScreenPosition
+                        end
+                        if ESP.Drawing.Text.Visible then
+                            local Distance = GetDistanceFromClient(ESP.Model.Character.PrimaryPart.Position)
+                            ESP.Drawing.Text.Size = ESP.Config.TextSize
+                            ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Model.Name,Distance)
+                            ESP.Drawing.Text.Position = Vector2.new(ScreenPosition.X + ScreenSize.X * 0.5, ScreenPosition.Y + ScreenSize.Y)
+                        end
                     end
                 end
             end
@@ -173,7 +191,7 @@ RunService.Heartbeat:Connect(function()
 
                 if OnScreen then
                     IsAlive = CharacterManager(ESP.Model)
-                    if ESP.Model:FindFirstChild("Head") and ESP.Drawing.HeadCircle.Visible then
+                    if ESP.Drawing.HeadCircle.Visible and ESP.Model:FindFirstChild("Head") then
                         local HeadPosition = Camera:WorldToViewportPoint(ESP.Model.Head.Position)
                         ESP.Drawing.HeadCircle.Color = ESP.Config.EnemyColor
                         ESP.Drawing.HeadCircle.Radius = ESP.Config.HeadCircleRadius
@@ -182,18 +200,20 @@ RunService.Heartbeat:Connect(function()
                         ESP.Drawing.HeadCircle.Position = Vector2.new(HeadPosition.X,HeadPosition.Y)
                     end
                     if ESP.Drawing.Box.Main.Visible or ESP.Drawing.Text.Visible then
-                        local Distance = GetDistanceFromClient(ESP.Model.PrimaryPart.Position)
-                        local Box = CalculateBox(ESP.Model)
-
-                        ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
-                        ESP.Drawing.Box.Main.Size = Box.ScreenSize
-                        ESP.Drawing.Box.Main.Position = Box.ScreenPosition
-                        ESP.Drawing.Box.Outline.Size = Box.ScreenSize
-                        ESP.Drawing.Box.Outline.Position = Box.ScreenPosition
-
-                        ESP.Drawing.Text.Size = ESP.Config.TextSize
-                        ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Config.Name,Distance)
-                        ESP.Drawing.Text.Position = Vector2.new(Box.ScreenPosition.X + Box.ScreenSize.X/2, Box.ScreenPosition.Y + Box.ScreenSize.Y)
+                        local ScreenPosition, ScreenSize = CalculateBox(ESP.Model,ESP.Model.PrimaryPart.CFrame.Position,WorldPosition)
+                        if ESP.Drawing.Box.Main.Visible then
+                            ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
+                            ESP.Drawing.Box.Main.Size = ScreenSize
+                            ESP.Drawing.Box.Main.Position = ScreenPosition
+                            ESP.Drawing.Box.Outline.Size = ScreenSize
+                            ESP.Drawing.Box.Outline.Position = ScreenPosition
+                        end
+                        if ESP.Drawing.Text.Visible then
+                            local Distance = GetDistanceFromClient(ESP.Model.PrimaryPart.Position)
+                            ESP.Drawing.Text.Size = ESP.Config.TextSize
+                            ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Config.Name,Distance)
+                            ESP.Drawing.Text.Position = Vector2.new(ScreenPosition.X + ScreenSize.X * 0.5, ScreenPosition.Y + ScreenSize.Y)
+                        end
                     end
                 end
             end
