@@ -119,12 +119,14 @@ getgenv().Config = {
     },
 
     -- Circle
-    CircleVisible = true,
-    CircleTransparency = 1,
-    CircleColor = Color3.fromRGB(255,128,64),
-    CircleThickness = 1,
-    CircleNumSides = 100,
-    CircleFilled = false,
+    Circle = {
+        Visible = true,
+        Transparency = 1,
+        Color = Color3.fromRGB(255,128,64),
+        Thickness = 1,
+        NumSides = 100,
+        Filled = false
+    },
 
     -- Aimbot
     SilentAim = true,
@@ -171,7 +173,7 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             end})
             AimbotSection:AddToggle({Name = "Silent Aim",Value = Config.SilentAim,Callback = function(Bool)
                 Config.SilentAim = Bool
-            end}):AddBind({Key = Config.Binds.SilentAim,Callback = function(Bool,Key)
+            end}):AddBind({Key = Config.Binds.SilentAim,Mouse = true,Callback = function(Bool,Key)
                 Config.Binds.SilentAim = Key or "NONE"
             end})
             AimbotSection:AddToggle({Name = "Wallcheck",Value = Config.Wallcheck,Callback = function(Bool)
@@ -769,14 +771,14 @@ end)
 -- render
 local Circle = Drawing.new("Circle")
 RunService.Heartbeat:Connect(function()
-    Circle.Visible = Config.CircleVisible
+    Circle.Visible = Config.Circle.Visible
     if Circle.Visible then
-        Circle.Transparency = Config.CircleTransparency
-        Circle.Color = Config.CircleColor
-        Circle.Thickness = Config.CircleThickness
-        Circle.NumSides = Config.CircleNumSides
+        Circle.Transparency = Config.Circle.Transparency
+        Circle.Color = Config.Circle.Color
+        Circle.Thickness = Config.Circle.Thickness
+        Circle.NumSides = Config.Circle.NumSides
         Circle.Radius = Config.FieldOfView
-        Circle.Filled = Config.CircleFilled
+        Circle.Filled = Config.Circle.Filled
         Circle.Position = UserInputService:GetMouseLocation()
     end
 
