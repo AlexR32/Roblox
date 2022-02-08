@@ -1,7 +1,7 @@
 -- script execute checks
 repeat task.wait() until game.IsLoaded
 local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/TypeWriter.lua"))()
-if getgenv().MultihackExecuted then NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> script already executed",15,0) return end
+if getgenv().MultihackExecuted then NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(63,126,252)\"><b>ⓘ</b></font></font> script already executed",15,0) return end
 getgenv().MultihackExecuted = true
 
 -- dependencies
@@ -23,10 +23,10 @@ local AircraftTip = nil
 
 -- various checks and QOT
 if not LocalPlayer then
-    --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find localplayer, making finding loop...",15,0)
+    --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find localplayer, making finding loop...",15,0)
     while task.wait() do
         if PlayerService.LocalPlayer then
-            --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> localplayer founded",15,0)
+            --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> localplayer founded",15,0)
             LocalPlayer = PlayerService.LocalPlayer
             break
         end
@@ -34,7 +34,7 @@ if not LocalPlayer then
 end
 LocalPlayer.OnTeleport:Connect(function(State)
     if State == Enum.TeleportState.Started then
-        --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> queue on teleport started",15,0)
+        --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> queue on teleport started",15,0)
         getgenv().MultihackExecuted = false
         local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
         QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BRM5/SilentAim.lua"))
@@ -42,10 +42,10 @@ LocalPlayer.OnTeleport:Connect(function(State)
 end)
 local NPCFolder = Workspace:FindFirstChild("Enemies")
 if not NPCFolder then
-    --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find enemies, making finding loop...",15,0)
+    --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find enemies, making finding loop...",15,0)
     while task.wait() do
         if Workspace:FindFirstChild("Enemies") then
-            --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> enemies founded",15,0)
+            --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> enemies founded",15,0)
             NPCFolder = Workspace:FindFirstChild("Enemies")
             break
         end
@@ -372,7 +372,7 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             if #x > 0 then
                 game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, x[math.random(1, #x)])
             else
-                return NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> couldn't find a server",15,0)
+                NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> couldn't find a server",15,0)
             end
         end})
         SettingsTab:AddButton({Name = "Join Discord Server",Side = "Left",Callback = function()
