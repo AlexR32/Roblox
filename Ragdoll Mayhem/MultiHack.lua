@@ -1,8 +1,10 @@
+-- script execute checks
 repeat task.wait() until game.IsLoaded
 local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/TypeWriter.lua"))()
 if getgenv().MultihackExecuted then NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> script already executed",15,0) return end
 getgenv().MultihackExecuted = true
 
+-- dependencies
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
@@ -12,9 +14,11 @@ local PlayerService = game:GetService("Players")
 local LocalPlayer = PlayerService.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
+-- variables
 local Target = nil
 local Aimbot = false
 
+-- various checks and QOT
 if not LocalPlayer then
     NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find localplayer, making finding loop...",15,0)
     while task.wait() do
@@ -48,6 +52,7 @@ end
 local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
 local ConfigSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
 
+-- config system
 local function SaveConfig()
     if isfile("Alex's Scripts/RU_SilentAim.json") then
         ConfigSystem.WriteJSON(Config,"Alex's Scripts/RU_SilentAim.json")
@@ -64,7 +69,6 @@ local function LoadConfig()
         ConfigSystem.WriteJSON(Config,"Alex's Scripts/RU_SilentAim.json")
     end
 end
-
 getgenv().Config = {
     UI = {
         Enabled = true,
@@ -107,13 +111,14 @@ getgenv().Config = {
     },
 
     SilentAim = false,
-    Wallcheck = false,
+    WallCheck = false,
     Sensitivity = 0.5,
     FieldOfView = 100,
     AimHitbox = "Head"
 }
 LoadConfig()
 
+-- ui library
 local Library = loadstring(game:GetObjects("rbxassetid://7974127463")[1].Source)()
 local Window = Library({Name = "RAGDOLL UNIVERSE Multihack",Enabled = Config.UI.Enabled,Color = Config.UI.Color,Position = UDim2.new(0.2,-248,0.5,-248)}) do
     local MainTab = Window:AddTab({Name = "Main"}) do
@@ -127,8 +132,8 @@ local Window = Library({Name = "RAGDOLL UNIVERSE Multihack",Enabled = Config.UI.
             end}):AddBind({Key = Config.Binds.SilentAim,Mouse = true,Callback = function(Bool,Key)
                 Config.Binds.SilentAim = Key or "NONE"
             end})
-            AimbotSection:AddToggle({Name = "Wallcheck",Value = Config.Wallcheck,Callback = function(Bool)
-                Config.Wallcheck = Bool
+            AimbotSection:AddToggle({Name = "WallCheck",Value = Config.WallCheck,Callback = function(Bool)
+                Config.WallCheck = Bool
             end})
             AimbotSection:AddSlider({Name = "Sensitivity",Min = 0,Max = 1,Precise = 2,Value = Config.Sensitivity,Callback = function(Number)
                 Config.Sensitivity = Number
@@ -301,7 +306,7 @@ local Window = Library({Name = "RAGDOLL UNIVERSE Multihack",Enabled = Config.UI.
             CreditsSection:AddLabel({Text = "Thanks to coasts For His Univeral ESP/Visuals\n(Forked and remade to module)"})
             CreditsSection:AddLabel({Text = "Thanks to el3tric for Bracket V2\n(Remade to Bracket V3.1)"})
             CreditsSection:AddLabel({Text = "And AlexR32#0157 (Me) For Making This Awesome Script!"})
-            CreditsSection:AddLabel({Text = "\xE2\x9D\xA4 \xE2\x9D\xA4 \xE2\x9D\xA4 \xE2\x9D\xA4"})
+            CreditsSection:AddLabel({Text = "❤️ ❤️ ❤️ ❤️"})
         end
     end
 end
@@ -317,15 +322,15 @@ local function TeamCheck(Player)
     return true
 end
 
-local function Wallcheck(Part)
-    if Config.Wallcheck and Part then
+local function WallCheck(Target)
+    if Config.WallCheck then
         local Camera = Workspace.CurrentCamera
         local RaycastParameters = RaycastParams.new()
         RaycastParameters.FilterType = Enum.RaycastFilterType.Blacklist
-        RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character,Part.Parent}
+        RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character,Target}
         RaycastParameters.IgnoreWater = true
         
-        if Workspace:Raycast(Camera.CFrame.Position, (Part.Position - Camera.CFrame.Position), RaycastParameters) then
+        if Workspace:Raycast(Camera.CFrame.Position, Target.Position - Camera.CFrame.Position, RaycastParameters) then
             return false
         end
     end
@@ -333,19 +338,19 @@ local function Wallcheck(Part)
 end
 
 local function GetTarget()
-    local ClosestTarget = nil
-    local FarthestDistance = Config.FieldOfView
     local Camera = Workspace.CurrentCamera
+    local FieldOfView = Config.FieldOfView
+    local ClosestTarget = nil
 
     for Index, Target in pairs(PlayerService:GetPlayers()) do
         local Character = Target.Character
-        local Hitbox = Character and Character:FindFirstChild(Config.AimHitbox) or Character and (Character:IsA("Model") and Character.PrimaryPart)
-        local Health = Character and Character:FindFirstChildOfClass("Humanoid") and Character:FindFirstChildOfClass("Humanoid").Health > 0
-        if Hitbox and Health and TeamCheck(Target) then
+        local Hitbox = (Character and Character:FindFirstChild(Config.AimHitbox)) or (Character and (Character:IsA("Model") and Character.PrimaryPart))
+        local Health = Character and (Character:FindFirstChildOfClass("Humanoid") and Character:FindFirstChildOfClass("Humanoid").Health > 0)
+        if Target ~= LocalPlayer and Hitbox and Health and TeamCheck(Target) then
             local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Hitbox.Position)
-            local MouseDistance = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
-            if OnScreen and MouseDistance < FarthestDistance and Wallcheck(Hitbox) then
-                FarthestDistance = MouseDistance
+            local Magnitude = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
+            if OnScreen and WallCheck(Hitbox) and FieldOfView > Magnitude then
+                FieldOfView = Magnitude
                 ClosestTarget = Hitbox
             end
         end
@@ -353,28 +358,8 @@ local function GetTarget()
 
     return ClosestTarget
 end
---[[
-local function GetDummyTarget()
-    local ClosestTarget = nil
-    local FarthestDistance = Config.FieldOfView
-    local Camera = Workspace.CurrentCamera
-    
-    for Index, Target in pairs(Workspace.LiveRagdolls:GetChildren()) do
-        local Hitbox = Target:FindFirstChild(Config.AimHitbox) or (Target:IsA("Model") and Target.PrimaryPart)
-        local Health = Target:FindFirstChildOfClass("Humanoid") and Target:FindFirstChildOfClass("Humanoid").Health > 0
-        if Hitbox and Health then
-            local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Hitbox.Position)
-            local MouseDistance = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
-            if OnScreen and MouseDistance < FarthestDistance and Wallcheck(Hitbox) then
-                FarthestDistance = MouseDistance
-                ClosestTarget = Hitbox
-            end
-        end
-    end
-    
-    return ClosestTarget
-end
-]]
+
+-- silent aim hook
 local namecall
 namecall = hookmetamethod(game, "__namecall", function(self, ...)
     local namecallmethod = getnamecallmethod()
@@ -390,6 +375,7 @@ namecall = hookmetamethod(game, "__namecall", function(self, ...)
     return namecall(self, unpack(args))
 end)
 
+-- circle and aim assist update loop
 local Circle = Drawing.new("Circle")
 RunService.RenderStepped:Connect(function()
     Circle.Visible = Config.Circle.Visible
@@ -412,11 +398,12 @@ RunService.RenderStepped:Connect(function()
     if Aimbot and Target then
         local Camera = Workspace.CurrentCamera
         local Mouse = UserInputService:GetMouseLocation()
-        local TargetPos = Camera:WorldToViewportPoint(Target.Position)
-        mousemoverel((TargetPos.X - Mouse.X) * Config.Sensitivity, (TargetPos.Y - Mouse.Y) * Config.Sensitivity)
+        local TargetOnScreen = Camera:WorldToViewportPoint(Target.Position)
+        mousemoverel((TargetOnScreen.X - Mouse.X) * Config.Sensitivity, (TargetOnScreen.Y - Mouse.Y) * Config.Sensitivity)
     end
 end)
 
+-- esp
 for Index, Player in pairs(PlayerService:GetPlayers()) do
     if Player == LocalPlayer then continue end
     ESPLibrary.Add("Player", Player, Config.PlayerESP)
