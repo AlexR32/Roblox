@@ -1,8 +1,10 @@
+-- script execute checks
 repeat task.wait() until game.IsLoaded
 local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/TypeWriter.lua"))()
 if getgenv().MultihackExecuted then NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> script already executed",15,0) return end
 getgenv().MultihackExecuted = true
 
+-- dependencies
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
@@ -13,11 +15,13 @@ local PlayerService = game:GetService("Players")
 local LocalPlayer = PlayerService.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
+-- variables
 local Target = nil
 local Aimbot = false
 local GroundTip = nil
 local AircraftTip = nil
 
+-- various checks and QOT
 if not LocalPlayer then
     NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find localplayer, making finding loop...",15,0)
     while task.wait() do
@@ -48,9 +52,11 @@ if not NPCFolder then
     end
 end
 
+-- helpful modules
 local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
 local ConfigSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
 
+-- config system
 local function SaveConfig()
     if isfile("Alex's Scripts/BRM5_SilentAim.json") then
         ConfigSystem.WriteJSON(Config,"Alex's Scripts/BRM5_SilentAim.json")
@@ -131,7 +137,7 @@ getgenv().Config = {
     -- Aimbot
     SilentAim = true,
     SAMode = "Gun",
-    Wallcheck = false,
+    WallCheck = false,
 
     -- Aimbot Settings
     Sensitivity = 0.5,
@@ -163,6 +169,7 @@ getgenv().Config = {
 }
 LoadConfig()
 
+-- ui library
 local Library = loadstring(game:GetObjects("rbxassetid://7974127463")[1].Source)()
 local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = Config.UI.Enabled,Color = Config.UI.Color,Position = UDim2.new(0.2,-248,0.5,-248)}) do
     local MainTab = Window:AddTab({Name = "Main"}) do
@@ -176,8 +183,8 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             end}):AddBind({Key = Config.Binds.SilentAim,Mouse = true,Callback = function(Bool,Key)
                 Config.Binds.SilentAim = Key or "NONE"
             end})
-            AimbotSection:AddToggle({Name = "Wallcheck",Value = Config.Wallcheck,Callback = function(Bool)
-                Config.Wallcheck = Bool
+            AimbotSection:AddToggle({Name = "WallCheck",Value = Config.WallCheck,Callback = function(Bool)
+                Config.WallCheck = Bool
             end})
             AimbotSection:AddSlider({Name = "Sensitivity",Min = 0,Max = 1,Precise = 2,Value = Config.Sensitivity,Callback = function(Number)
                 Config.Sensitivity = Number
@@ -262,23 +269,23 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             end})
         end
         local CircleSection = MainTab:AddSection({Name = "FoV Circle",Side = "Right"}) do
-            CircleSection:AddToggle({Name = "Enable",Value = Config.CircleVisible,Callback = function(Bool)
-                Config.CircleVisible = Bool
+            CircleSection:AddToggle({Name = "Enable",Value = Config.Circle.Visible,Callback = function(Bool)
+                Config.Circle.Visible = Bool
             end})
-            CircleSection:AddToggle({Name = "Filled",Value = Config.CircleFilled,Callback = function(Bool)
-                Config.CircleFilled = Bool
+            CircleSection:AddToggle({Name = "Filled",Value = Config.Circle.Filled,Callback = function(Bool)
+                Config.Circle.Filled = Bool
             end})
-            CircleSection:AddColorpicker({Name = "Color",Color = Config.CircleColor,Callback = function(Color)
-                Config.CircleColor = Color
+            CircleSection:AddColorpicker({Name = "Color",Color = Config.Circle.Color,Callback = function(Color)
+                Config.Circle.Color = Color
             end})
-            CircleSection:AddSlider({Name = "Transparency",Min = 0,Max = 1,Precise = 2,Value = Config.CircleTransparency,Callback = function(Number)
-                Config.CircleTransparency = Number
+            CircleSection:AddSlider({Name = "Transparency",Min = 0,Max = 1,Precise = 2,Value = Config.Circle.Transparency,Callback = function(Number)
+                Config.Circle.Transparency = Number
             end})
-            CircleSection:AddSlider({Name = "Thickness",Min = 1,Max = 10,Value = Config.CircleThickness,Callback = function(Number)
-                Config.CircleThickness = Number
+            CircleSection:AddSlider({Name = "Thickness",Min = 1,Max = 10,Value = Config.Circle.Thickness,Callback = function(Number)
+                Config.Circle.Thickness = Number
             end})
-            CircleSection:AddSlider({Name = "NumSides",Min = 3,Max = 100,Value = Config.CircleNumSides,Callback = function(Number)
-                Config.CircleNumSides = Number
+            CircleSection:AddSlider({Name = "NumSides",Min = 3,Max = 100,Value = Config.Circle.NumSides,Callback = function(Number)
+                Config.Circle.NumSides = Number
             end})
         end
         local OtherSection = MainTab:AddSection({Name = "Other",Side = "Right"}) do
@@ -446,10 +453,10 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
         local CreditsSection = SettingsTab:AddSection({Name = "Credits",Side = "Right"}) do
             CreditsSection:AddLabel({Text = "Thanks to Jan For This Awesome Patterns"})
             CreditsSection:AddLabel({Text = "Thanks to Infinite Yield Team For Server Hop"})
-            CreditsSection:AddLabel({Text = "Thanks to coasts For His Univeral ESP/Visuals\n(Forked and remade to module)"})
-            CreditsSection:AddLabel({Text = "Thanks to el3tric for Bracket V2\n(Remade to Bracket V3.1)"})
+            CreditsSection:AddLabel({Text = "Thanks to coasts For His Univeral ESP/Visuals (Forked and remade to module)"})
+            CreditsSection:AddLabel({Text = "Thanks to el3tric for Bracket V2 (Remade to Bracket V3.1)"})
             CreditsSection:AddLabel({Text = "And AlexR32#0157 (Me) For Making This Awesome Script!"})
-            CreditsSection:AddLabel({Text = "\xE2\x9D\xA4 \xE2\x9D\xA4 \xE2\x9D\xA4 \xE2\x9D\xA4"})
+            CreditsSection:AddLabel({Text = "❤️ ❤️ ❤️ ❤️"})
         end
     end
 end
@@ -461,15 +468,15 @@ local function TeamCheck(Target)
     return true
 end
 
-local function Wallcheck(Part)
-    if Config.Wallcheck and Part then
+local function WallCheck(Target)
+    if Config.WallCheck then
         local Camera = Workspace.CurrentCamera
         local RaycastParameters = RaycastParams.new()
         RaycastParameters.FilterType = Enum.RaycastFilterType.Blacklist
-        RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character,Part.Parent}
+        RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character,Target}
         RaycastParameters.IgnoreWater = true
         
-        if Workspace:Raycast(Camera.CFrame.Position, (Part.Position - Camera.CFrame.Position), RaycastParameters) then
+        if Workspace:Raycast(Camera.CFrame.Position, Target.Position - Camera.CFrame.Position, RaycastParameters) then
             return false
         end
     end
@@ -477,9 +484,9 @@ local function Wallcheck(Part)
 end
 
 local function GetTarget()
-    local ClosestTarget = nil
-    local FarthestDistance = Config.FieldOfView
     local Camera = Workspace.CurrentCamera
+    local FieldOfView = Config.FieldOfView
+    local ClosestTarget = nil
 
     if Config.TargetMode == "NPC" then
         for Index, Target in pairs(NPCFolder:GetChildren()) do
@@ -487,9 +494,9 @@ local function GetTarget()
             local Health = Target:FindFirstChildOfClass("Humanoid") and Target:FindFirstChildOfClass("Humanoid").Health > 0
             if Hitbox and Health then
                 local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Hitbox.Position)
-                local MouseDistance = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
-                if OnScreen and MouseDistance < FarthestDistance and Wallcheck(Hitbox) then
-                    FarthestDistance = MouseDistance
+                local Magnitude = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
+                if OnScreen and WallCheck(Hitbox) and FieldOfView > Magnitude then
+                    FieldOfView = Magnitude
                     ClosestTarget = Hitbox
                 end
             end
@@ -497,65 +504,24 @@ local function GetTarget()
     elseif Config.TargetMode == "Player" then
         for Index, Target in pairs(PlayerService:GetPlayers()) do
             local Character = Target.Character
-            local Hitbox = Character and Character:FindFirstChild(Config.AimHitbox) or Character and (Character:IsA("Model") and Character.PrimaryPart)
-            local Health = Character and Character:FindFirstChildOfClass("Humanoid") and Character:FindFirstChildOfClass("Humanoid").Health > 0
-            if Hitbox and Health and TeamCheck(Target) then
+            local Hitbox = (Character and Character:FindFirstChild(Config.AimHitbox)) or (Character and (Character:IsA("Model") and Character.PrimaryPart))
+            local Health = Character and (Character:FindFirstChildOfClass("Humanoid") and Character:FindFirstChildOfClass("Humanoid").Health > 0)
+            if Target ~= LocalPlayer and Hitbox and Health and TeamCheck(Target) then
                 local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Hitbox.Position)
-                local MouseDistance = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
-                if OnScreen and MouseDistance < FarthestDistance and Wallcheck(Hitbox) then
-                    FarthestDistance = MouseDistance
+                local Magnitude = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
+                if OnScreen and WallCheck(Hitbox) and FieldOfView > Magnitude then
+                    FieldOfView = Magnitude
                     ClosestTarget = Hitbox
                 end
             end
         end
     end
-    
+
     return ClosestTarget
 end
 
---[[ old get target
-function GetTarget()
-    local ClosestPlayer = nil
-    local FarthestDistance = math.huge
-    local Camera = Workspace.CurrentCamera
-    if Config.TargetMode == "NPC" then
-        for Index, NPC in pairs(NPCFolder:GetChildren()) do
-            if NPC:FindFirstChild(Config.AimHitbox) and NPC:FindFirstChild("Vest") then
-                if NPC:FindFirstChildOfClass("Humanoid") and NPC:FindFirstChildOfClass("Humanoid").Health ~= 0 then
-                    local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(NPC:FindFirstChild(Config.AimHitbox).Position)
-                    if OnScreen and Wallcheck(NPC:FindFirstChild(Config.AimHitbox)) then
-                        local MouseDistance = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
-                        if MouseDistance < FarthestDistance and MouseDistance <= Config.FieldOfView then
-                            FarthestDistance = MouseDistance
-                            ClosestPlayer = NPC:FindFirstChild(Config.AimHitbox)
-                        end
-                    end
-                end
-            end
-        end
-    elseif Config.TargetMode == "Player" then
-        for Index, Player in pairs(PlayerService:GetPlayers()) do
-            if Player ~= LocalPlayer and TeamCheck(Player) then
-                if Player.Character and Player.Character:FindFirstChild(Config.AimHitbox) then
-                    if Player.Character:FindFirstChildOfClass("Humanoid") and Player.Character:FindFirstChildOfClass("Humanoid").Health ~= 0 then
-                        local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Player.Character:FindFirstChild(Config.AimHitbox).Position)
-                        if OnScreen and Wallcheck(Player.Character:FindFirstChild(Config.AimHitbox)) then
-                            local MouseDistance = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
-                            if MouseDistance < FarthestDistance and MouseDistance <= Config.FieldOfView then
-                                FarthestDistance = MouseDistance
-                                ClosestPlayer = Player.Character:FindFirstChild(Config.AimHitbox)
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return ClosestPlayer
-end
-]]
-
-local function Require(Name)
+-- game modules hook
+local function requireGameModule(Name)
     for Index, Instance in pairs(getnilinstances()) do
         if Instance.Name == Name then
             return require(Instance)
@@ -563,15 +529,14 @@ local function Require(Name)
     end
 end
 
--- game modules hook
-local ControllerClass = Require("ControllerClass")
+local ControllerClass = requireGameModule("ControllerClass")
 local controllerOld
 while task.wait() do
     if ControllerClass and ControllerClass.LateUpdate then
         controllerOld = ControllerClass.LateUpdate
         break
     else
-        ControllerClass = Require("ControllerClass")
+        ControllerClass = requireGameModule("ControllerClass")
     end
 end
 if ControllerClass and controllerOld then
@@ -584,14 +549,14 @@ if ControllerClass and controllerOld then
     end
 end
 
-local CharacterCamera = Require("CharacterCamera")
+local CharacterCamera = requireGameModule("CharacterCamera")
 local cameraOld
 while task.wait() do
     if CharacterCamera and CharacterCamera.Update then
         cameraOld = CharacterCamera.Update
         break
     else
-        CharacterCamera = Require("CharacterCamera")
+        CharacterCamera = requireGameModule("CharacterCamera")
     end
 end
 if CharacterCamera and cameraOld then
@@ -606,14 +571,14 @@ if CharacterCamera and cameraOld then
     end
 end
 
-local TurretCamera = Require("TurretCamera")
+local TurretCamera = requireGameModule("TurretCamera")
 local turretCamOld
 while task.wait() do
     if TurretCamera and TurretCamera.Update then
         turretCamOld = TurretCamera.Update
         break
     else
-        TurretCamera = Require("TurretCamera")
+        TurretCamera = requireGameModule("TurretCamera")
     end
 end
 if TurretCamera and turretCamOld then
@@ -626,7 +591,7 @@ if TurretCamera and turretCamOld then
     end
 end
 
-local FirearmInventory = Require("FirearmInventory")
+local FirearmInventory = requireGameModule("FirearmInventory")
 local firearmDischargeOld
 local firearmNewOld
 while task.wait() do
@@ -635,7 +600,7 @@ while task.wait() do
         firearmNewOld = FirearmInventory.new
         break
     else
-        FirearmInventory = Require("FirearmInventory")
+        FirearmInventory = requireGameModule("FirearmInventory")
     end
 end
 if FirearmInventory and firearmDischargeOld and firearmNewOld then
@@ -667,14 +632,14 @@ if FirearmInventory and firearmDischargeOld and firearmNewOld then
     end
 end
 
-local GroundMovement = Require("GroundMovement")
+local GroundMovement = requireGameModule("GroundMovement")
 local groundOld
 while task.wait() do
     if GroundMovement and GroundMovement.Update then
         groundOld = GroundMovement.Update
         break
     else
-        GroundMovement = Require("GroundMovement")
+        GroundMovement = requireGameModule("GroundMovement")
     end
 end
 if GroundMovement and groundOld then
@@ -688,14 +653,14 @@ if GroundMovement and groundOld then
     end
 end
 
-local HelicopterMovement = Require("HelicopterMovement")
+local HelicopterMovement = requireGameModule("HelicopterMovement")
 local heliOld
 while task.wait() do
     if HelicopterMovement and HelicopterMovement.Update then
         heliOld = HelicopterMovement.Update
         break
     else
-        HelicopterMovement = Require("HelicopterMovement")
+        HelicopterMovement = requireGameModule("HelicopterMovement")
     end
 end
 if HelicopterMovement and heliOld then
@@ -708,14 +673,14 @@ if HelicopterMovement and heliOld then
     end
 end
 
-local AircraftMovement = Require("AircraftMovement")
+local AircraftMovement = requireGameModule("AircraftMovement")
 local aircraftDischargeOld
 while task.wait() do
     if AircraftMovement and AircraftMovement._discharge then
         aircraftDischargeOld = AircraftMovement._discharge
         break
     else
-        AircraftMovement = Require("AircraftMovement")
+        AircraftMovement = requireGameModule("AircraftMovement")
     end
 end
 if AircraftMovement and aircraftDischargeOld then
@@ -729,14 +694,14 @@ if AircraftMovement and aircraftDischargeOld then
     end
 end
 
-local TurretMovement = Require("TurretMovement")
+local TurretMovement = requireGameModule("TurretMovement")
 local turretOld
 while task.wait() do
     if TurretMovement and TurretMovement._discharge then
         turretOld = TurretMovement._discharge
         break
     else
-        TurretMovement = Require("TurretMovement")
+        TurretMovement = requireGameModule("TurretMovement")
     end
 end
 if TurretMovement and turretOld then
@@ -768,7 +733,7 @@ namecall = hookmetamethod(game, "__namecall", function(self, ...)
     return namecall(self, unpack(args))
 end)
 
--- render
+-- circle, aim assist and misc heartbeat loop
 local Circle = Drawing.new("Circle")
 RunService.Heartbeat:Connect(function()
     Circle.Visible = Config.Circle.Visible
@@ -804,6 +769,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+-- esp
 for Index, NPC in pairs(NPCFolder:GetChildren()) do
     if NPC:WaitForChild("Vest",0.5) then
         ESPLibrary.Add("NPC", NPC, Config.NPCESP)
