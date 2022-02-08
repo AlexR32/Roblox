@@ -23,10 +23,10 @@ local AircraftTip = nil
 
 -- various checks and QOT
 if not LocalPlayer then
-    NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find localplayer, making finding loop...",15,0)
+    --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find localplayer, making finding loop...",15,0)
     while task.wait() do
         if PlayerService.LocalPlayer then
-            NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> localplayer founded",15,0)
+            --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> localplayer founded",15,0)
             LocalPlayer = PlayerService.LocalPlayer
             break
         end
@@ -34,7 +34,7 @@ if not LocalPlayer then
 end
 LocalPlayer.OnTeleport:Connect(function(State)
     if State == Enum.TeleportState.Started then
-        NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> queue on teleport started",15,0)
+        --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> queue on teleport started",15,0)
         getgenv().MultihackExecuted = false
         local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
         QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BRM5/SilentAim.lua"))
@@ -42,10 +42,10 @@ LocalPlayer.OnTeleport:Connect(function(State)
 end)
 local NPCFolder = Workspace:FindFirstChild("Enemies")
 if not NPCFolder then
-    NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find enemies, making finding loop...\nyou are probably not in openworld",15,0)
+    --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find enemies, making finding loop...",15,0)
     while task.wait() do
         if Workspace:FindFirstChild("Enemies") then
-            NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> enemies founded",15,0)
+            --NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> enemies founded",15,0)
             NPCFolder = Workspace:FindFirstChild("Enemies")
             break
         end
@@ -73,7 +73,6 @@ local function LoadConfig()
         ConfigSystem.WriteJSON(Config,"Alex's Scripts/BRM5_SilentAim.json")
     end
 end
-
 getgenv().Config = {
     UI = {
         Enabled = true,
@@ -85,7 +84,6 @@ getgenv().Config = {
         BackgroundTransparency = 0
     },
 
-    -- ESP
     PlayerESP = {
         AllyColor = Color3.fromRGB(64,255,64),
         EnemyColor = Color3.fromRGB(255,64,64),
@@ -124,7 +122,6 @@ getgenv().Config = {
         Helicopter = "NONE"
     },
 
-    -- Circle
     Circle = {
         Visible = true,
         Transparency = 1,
@@ -134,18 +131,15 @@ getgenv().Config = {
         Filled = false
     },
 
-    -- Aimbot
     SilentAim = true,
     SAMode = "Gun",
     WallCheck = false,
 
-    -- Aimbot Settings
     Sensitivity = 0.5,
     FieldOfView = 100,
     TargetMode = "NPC",
     AimHitbox = "Head",
 
-    -- Other
     EnvEnable = false,
     EnvTime = 12,
     EnvBrightness = 2,
@@ -715,7 +709,7 @@ if TurretMovement and turretOld then
     end
 end
 
--- silent aim raycast hook
+-- silent aim hook
 local namecall
 namecall = hookmetamethod(game, "__namecall", function(self, ...)
     local namecallmethod = getnamecallmethod()
@@ -755,8 +749,8 @@ RunService.Heartbeat:Connect(function()
     if Aimbot and Target then
         local Camera = Workspace.CurrentCamera
         local Mouse = UserInputService:GetMouseLocation()
-        local TargetPos = Camera:WorldToViewportPoint(Target.Position)
-        mousemoverel((TargetPos.X - Mouse.X) * Config.Sensitivity, (TargetPos.Y - Mouse.Y) * Config.Sensitivity)
+        local TargetOnScreen = Camera:WorldToViewportPoint(Target.Position)
+        mousemoverel((TargetOnScreen.X - Mouse.X) * Config.Sensitivity, (TargetOnScreen.Y - Mouse.Y) * Config.Sensitivity)
     end
 
     if Config.EnvEnable then
