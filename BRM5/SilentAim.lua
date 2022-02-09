@@ -716,12 +716,14 @@ namecall = hookmetamethod(game, "__namecall", function(self, ...)
     local args = {...}
     if namecallmethod == "Raycast" then
         local Camera = Workspace.CurrentCamera
-        if Target and Config.SAMode == "Gun" and args[1] == Camera.CFrame.Position then
-            args[2] = (Target.Position - Camera.CFrame.Position)
-        elseif Target and Config.SAMode == "Aircraft" and AircraftTip and args[1] == AircraftTip.WorldCFrame.Position then
-            args[2] = (Target.Position - AircraftTip.WorldCFrame.Position)
-        elseif Target and Config.SAMode == "Turret" and GroundTip and args[1] == GroundTip.WorldCFrame.Position then
-            args[2] = (Target.Position - GroundTip.WorldCFrame.Position)
+        if Config.SilentAim and Target then
+            if Config.SAMode == "Gun" and args[1] == Camera.CFrame.Position then
+                args[2] = Target.Position - Camera.CFrame.Position
+            elseif Config.SAMode == "Aircraft" and AircraftTip and args[1] == AircraftTip.WorldCFrame.Position then
+                args[2] = Target.Position - AircraftTip.WorldCFrame.Position
+            elseif Config.SAMode == "Turret" and GroundTip and args[1] == GroundTip.WorldCFrame.Position then
+                args[2] = Target.Position - GroundTip.WorldCFrame.Position
+            end
         end
     end
     return namecall(self, unpack(args))
@@ -741,7 +743,8 @@ RunService.Heartbeat:Connect(function()
         Circle.Position = UserInputService:GetMouseLocation()
     end
 
-    if Aimbot or Config.SilentAim or InstantSA then
+    --Target = (Aimbot or Config.SilentAim) and GetTarget()
+    if Aimbot or Config.SilentAim then
         Target = GetTarget()
     else
         Target = nil
