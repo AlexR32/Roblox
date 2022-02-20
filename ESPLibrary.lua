@@ -1,17 +1,19 @@
-local RunService = Game:GetService("RunService")
-local PlayerService = Game:GetService("Players")
+local RunService = game:GetService("RunService")
+local PlayerService = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = PlayerService.LocalPlayer
 
 local ESPLibrary = {}
 local ESPTable = {}
 
 function PlayerManager(Player)
-    local InEnemyTeam = true
-    local IsAlive = true
-    if LocalPlayer.Team == Player.Team then
-        InEnemyTeam = false
-    end
-    return InEnemyTeam, Player.TeamColor.Color
+    return LocalPlayer.Team ~= Player.Team,
+    Player.TeamColor.Color
+end
+
+function GetCharacter(Player)
+    return Player.Character,
+    Player.Character and Player.Character.PrimaryPart
 end
 
 local function CharacterManager(Character)
@@ -22,8 +24,10 @@ local function CharacterManager(Character)
     return IsAlive
 end
 
-local function GetDistanceFromClient(Position)
-    return LocalPlayer:DistanceFromCharacter(Position)
+local function GetDistanceFromCamera(Position)
+    local Camera = Workspace.CurrentCamera
+    return (Camera.CFrame.Position - Position).Magnitude
+    --return LocalPlayer:DistanceFromCharacter(Position)
 end
 
 local function AddDrawing(Type, Properties)
@@ -33,45 +37,31 @@ local function AddDrawing(Type, Properties)
     end
     return Drawing
 end
---[[
-local function CalculateBox(Model)
-    if not Model then return end
-    local CFrame, Size = Model:GetBoundingBox()
-    local Camera = Workspace.CurrentCamera
-    
-    local CornerTable = {
-        TopLeft = Camera:WorldToViewportPoint(Vector3.new(CFrame.X - Size.X / 2, CFrame.Y + Size.Y / 2, CFrame.Z)),
-        TopRight = Camera:WorldToViewportPoint(Vector3.new(CFrame.X + Size.X / 2, CFrame.Y + Size.Y / 2, CFrame.Z)),
-        BottomLeft = Camera:WorldToViewportPoint(Vector3.new(CFrame.X - Size.X / 2, CFrame.Y - Size.Y / 2, CFrame.Z)),
-        BottomRight = Camera:WorldToViewportPoint(Vector3.new(CFrame.X + Size.X / 2, CFrame.Y - Size.Y / 2, CFrame.Z))
-    }
-    
-    local WorldPosition, OnScreen = Camera:WorldToViewportPoint(CFrame.Position)
-    local ScreenSize = Vector2.new((CornerTable.TopLeft - CornerTable.TopRight).Magnitude, (CornerTable.TopLeft - CornerTable.BottomLeft).Magnitude)
-    local ScreenPosition = Vector2.new(WorldPosition.X - ScreenSize.X / 2, WorldPosition.Y - ScreenSize.Y / 2)
-    
-    return {
-        WorldPosition = WorldPosition,
-        ScreenPosition = ScreenPosition, 
-        ScreenSize = ScreenSize,
-        OnScreen = OnScreen
-    }
-end
-]]
 
-local function CalculateBox(Model,Position,WorldPosition)
+local function CalculateBox(Model,Orientation,ScreenPosition)
     local Camera = Workspace.CurrentCamera
     local Size = Model:GetExtentsSize()
 
     local CornerTable = {
-        TopLeft = Camera:WorldToViewportPoint(Vector3.new(Position.X - Size.X * 0.5, Position.Y + Size.Y * 0.5, Position.Z)),
-        TopRight = Camera:WorldToViewportPoint(Vector3.new(Position.X + Size.X * 0.5, Position.Y + Size.Y * 0.5, Position.Z)),
-        BottomLeft = Camera:WorldToViewportPoint(Vector3.new(Position.X - Size.X * 0.5, Position.Y - Size.Y * 0.5, Position.Z)),
-        BottomRight = Camera:WorldToViewportPoint(Vector3.new(Position.X + Size.X * 0.5, Position.Y - Size.Y * 0.5, Position.Z))
+        TopLeft = Camera:WorldToViewportPoint(Vector3.new(Orientation.X - Size.X * 0.5, Orientation.Y + Size.Y * 0.5, Orientation.Z)),
+        TopRight = Camera:WorldToViewportPoint(Vector3.new(Orientation.X + Size.X * 0.5, Orientation.Y + Size.Y * 0.5, Orientation.Z)),
+        BottomLeft = Camera:WorldToViewportPoint(Vector3.new(Orientation.X - Size.X * 0.5, Orientation.Y - Size.Y * 0.5, Orientation.Z)),
+        --BottomRight = Camera:WorldToViewportPoint(Vector3.new(Orientation.X + Size.X * 0.5, Orientation.Y - Size.Y * 0.5, Orientation.Z))
     }
     local ScreenSize = Vector2.new((CornerTable.TopLeft - CornerTable.TopRight).Magnitude, (CornerTable.TopLeft - CornerTable.BottomLeft).Magnitude)
-    return Vector2.new(WorldPosition.X - ScreenSize.X * 0.5, WorldPosition.Y - ScreenSize.Y * 0.5), ScreenSize
+    return Vector2.new(ScreenPosition.X - ScreenSize.X * 0.5, ScreenPosition.Y - ScreenSize.Y * 0.5), ScreenSize
 end
+--[[
+local function CalculateBox(Model,Orientation)
+    local Camera = Workspace.CurrentCamera
+    local Size = Model:GetExtentsSize()
+
+    local Height = (Camera.CFrame - Camera.CFrame.Position) * Vector3.new(0, math.clamp(Size.Y, 1, 10) * 0.5, 0)
+    Height = math.abs(Camera:WorldToScreenPoint(Orientation.Position + Height).Y - Camera:WorldToScreenPoint(Orientation.Position - Height).Y)
+    Size = Vector2.new(Height * 0.5, Height)
+    return Size
+end
+]]
 
 if game.PlaceId == 5565801610 or game.PlaceId == 5945728589 then
     function PlayerManager(Player)
@@ -84,6 +74,29 @@ if game.PlaceId == 5565801610 or game.PlaceId == 5945728589 then
         end
         return true, Player.TeamColor.Color
     end
+elseif game.PlaceId == 3233893879 then
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Toroiseshell = require(ReplicatedStorage.TS)
+
+    function PlayerManager(Player)
+        return LocalPlayer.Team ~= Player.Team,
+        Toroiseshell.Teams.Colors[Player.Team]
+    end
+
+    function GetCharacter(Player)
+        return Player.Character and Player.Character:FindFirstChild("Hitbox"),
+        Player.Character and Player.Character.PrimaryPart
+    end
+
+    local __index
+    __index = hookmetamethod(game, "__index", function(table, index)
+        if index == "Character" then
+            return Toroiseshell.Characters:GetCharacter(table)
+        elseif index == "Team" then
+            return Toroiseshell.Teams:GetPlayerTeam(table)
+        end
+        return __index(table, index)
+    end)
 end
 
 function ESPLibrary.Add(Mode, Model, Config)
@@ -148,26 +161,29 @@ end
 
 RunService.Heartbeat:Connect(function()
     for Index, ESP in pairs(ESPTable) do
-        local WorldPosition, OnScreen, IsAlive, InEnemyTeam, TeamColor = nil, false, true, true, nil
+        local ScreenPosition, OnScreen, IsAlive, InEnemyTeam, TeamColor = nil, false, true, true, nil
 
         if ESP.Mode == "Player" then
-            if ESP.Model.Character and ESP.Model.Character.PrimaryPart then
+            local Character, PrimaryPart = GetCharacter(ESP.Model)
+            if Character and PrimaryPart then
                 local Camera = Workspace.CurrentCamera
-                WorldPosition, OnScreen = Camera:WorldToViewportPoint(ESP.Model.Character.PrimaryPart.Position)
+                ScreenPosition, OnScreen = Camera:WorldToViewportPoint(PrimaryPart.Position)
 
                 if OnScreen then
                     InEnemyTeam,TeamColor = PlayerManager(ESP.Model)
-                    IsAlive = CharacterManager(ESP.Model.Character)
-                    if ESP.Drawing.HeadCircle.Visible and ESP.Model.Character:FindFirstChild("Head") then
-                        local HeadPosition = Camera:WorldToViewportPoint(ESP.Model.Character.Head.Position)
+                    IsAlive = CharacterManager(Character)
+                    if ESP.Drawing.HeadCircle.Visible and Character:FindFirstChild("Head") then
+                        local HeadPosition = Camera:WorldToViewportPoint(Character.Head.Position)
+                        local Distance = GetDistanceFromCamera(PrimaryPart.Position)
+                        local Radius = ESP.Config.HeadCircleAutoScale and math.clamp(1 / Distance * 1000, 0, ESP.Config.HeadCircleRadius) or ESP.Config.HeadCircleRadius
                         ESP.Drawing.HeadCircle.Color = not ESP.Config.TeamColor and (InEnemyTeam and ESP.Config.EnemyColor or ESP.Config.AllyColor) or TeamColor
-                        ESP.Drawing.HeadCircle.Radius = ESP.Config.HeadCircleRadius
+                        ESP.Drawing.HeadCircle.Radius = Radius
                         ESP.Drawing.HeadCircle.NumSides = ESP.Config.HeadCircleNumSides
                         ESP.Drawing.HeadCircle.Filled = ESP.Config.HeadCircleFilled
                         ESP.Drawing.HeadCircle.Position = Vector2.new(HeadPosition.X,HeadPosition.Y)
                     end
                     if ESP.Drawing.Box.Main.Visible or ESP.Drawing.Text.Visible then
-                        local ScreenPosition, ScreenSize = CalculateBox(ESP.Model.Character,ESP.Model.Character.PrimaryPart.CFrame.Position,WorldPosition)
+                        local ScreenPosition, ScreenSize = CalculateBox(Character,PrimaryPart.CFrame,ScreenPosition)
                         if ESP.Drawing.Box.Main.Visible then
                             ESP.Drawing.Box.Main.Color = not ESP.Config.TeamColor and (InEnemyTeam and ESP.Config.EnemyColor or ESP.Config.AllyColor) or TeamColor
                             ESP.Drawing.Box.Main.Size = ScreenSize
@@ -176,31 +192,33 @@ RunService.Heartbeat:Connect(function()
                             ESP.Drawing.Box.Outline.Position = ScreenPosition
                         end
                         if ESP.Drawing.Text.Visible then
-                            local Distance = GetDistanceFromClient(ESP.Model.Character.PrimaryPart.Position)
-                            ESP.Drawing.Text.Size = ESP.Config.TextSize
+                            local Distance = GetDistanceFromCamera(PrimaryPart.Position)
+                            local TextSize = ESP.Config.TextAutoScale and math.clamp(1 / Distance * 1000, 0, ESP.Config.TextSize) or ESP.Config.TextSize
+                            ESP.Drawing.Text.Size = TextSize
                             ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Model.Name,Distance)
                             ESP.Drawing.Text.Position = Vector2.new(ScreenPosition.X + ScreenSize.X * 0.5, ScreenPosition.Y + ScreenSize.Y)
                         end
                     end
                 end
             end
-        else
+        elseif ESP.Mode == "NPC" then
             if ESP.Model:IsA("Model") and ESP.Model.PrimaryPart then
                 local Camera = Workspace.CurrentCamera
-                WorldPosition, OnScreen = Camera:WorldToViewportPoint(ESP.Model.PrimaryPart.Position)
-
+                ScreenPosition, OnScreen = Camera:WorldToViewportPoint(ESP.Model.PrimaryPart.Position)
                 if OnScreen then
                     IsAlive = CharacterManager(ESP.Model)
                     if ESP.Drawing.HeadCircle.Visible and ESP.Model:FindFirstChild("Head") then
                         local HeadPosition = Camera:WorldToViewportPoint(ESP.Model.Head.Position)
+                        local Distance = GetDistanceFromCamera(ESP.Model.PrimaryPart.Position)
+                        local Radius = ESP.Config.HeadCircleAutoScale and math.clamp(1 / Distance * 1000, 0, ESP.Config.HeadCircleRadius) or ESP.Config.HeadCircleRadius
                         ESP.Drawing.HeadCircle.Color = ESP.Config.EnemyColor
-                        ESP.Drawing.HeadCircle.Radius = ESP.Config.HeadCircleRadius
+                        ESP.Drawing.HeadCircle.Radius = Radius
                         ESP.Drawing.HeadCircle.NumSides = ESP.Config.HeadCircleNumSides
                         ESP.Drawing.HeadCircle.Filled = ESP.Config.HeadCircleFilled
                         ESP.Drawing.HeadCircle.Position = Vector2.new(HeadPosition.X,HeadPosition.Y)
                     end
                     if ESP.Drawing.Box.Main.Visible or ESP.Drawing.Text.Visible then
-                        local ScreenPosition, ScreenSize = CalculateBox(ESP.Model,ESP.Model.PrimaryPart.CFrame.Position,WorldPosition)
+                        local ScreenPosition, ScreenSize = CalculateBox(ESP.Model,ESP.Model.PrimaryPart.CFrame,ScreenPosition)
                         if ESP.Drawing.Box.Main.Visible then
                             ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
                             ESP.Drawing.Box.Main.Size = ScreenSize
@@ -209,8 +227,34 @@ RunService.Heartbeat:Connect(function()
                             ESP.Drawing.Box.Outline.Position = ScreenPosition
                         end
                         if ESP.Drawing.Text.Visible then
-                            local Distance = GetDistanceFromClient(ESP.Model.PrimaryPart.Position)
-                            ESP.Drawing.Text.Size = ESP.Config.TextSize
+                            local Distance = GetDistanceFromCamera(ESP.Model.PrimaryPart.Position)
+                            local TextSize = ESP.Config.TextAutoScale and math.clamp(1 / Distance * 1000, 0, ESP.Config.TextSize) or ESP.Config.TextSize
+                            ESP.Drawing.Text.Size = TextSize
+                            ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Config.Name,Distance)
+                            ESP.Drawing.Text.Position = Vector2.new(ScreenPosition.X + ScreenSize.X * 0.5, ScreenPosition.Y + ScreenSize.Y)
+                        end
+                    end
+                end
+            end
+        elseif ESP.Mode == "Model" then
+            if ESP.Model:IsA("Model") and ESP.Model.PrimaryPart then
+                local Camera = Workspace.CurrentCamera
+                ScreenPosition, OnScreen = Camera:WorldToViewportPoint(ESP.Model.PrimaryPart.Position)
+
+                if OnScreen then
+                    if ESP.Drawing.Box.Main.Visible or ESP.Drawing.Text.Visible then
+                        local ScreenPosition, ScreenSize = CalculateBox(ESP.Model,ESP.Model.PrimaryPart.CFrame,ScreenPosition)
+                        if ESP.Drawing.Box.Main.Visible then
+                            ESP.Drawing.Box.Main.Color = ESP.Config.EnemyColor
+                            ESP.Drawing.Box.Main.Size = ScreenSize
+                            ESP.Drawing.Box.Main.Position = ScreenPosition
+                            ESP.Drawing.Box.Outline.Size = ScreenSize
+                            ESP.Drawing.Box.Outline.Position = ScreenPosition
+                        end
+                        if ESP.Drawing.Text.Visible then
+                            local Distance = GetDistanceFromCamera(ESP.Model.PrimaryPart.Position)
+                            local TextSize = ESP.Config.TextAutoScale and math.clamp(1 / Distance * 1000, 0, ESP.Config.TextSize) or ESP.Config.TextSize
+                            ESP.Drawing.Text.Size = TextSize
                             ESP.Drawing.Text.Text = string.format("%s\n%d studs",ESP.Config.Name,Distance)
                             ESP.Drawing.Text.Position = Vector2.new(ScreenPosition.X + ScreenSize.X * 0.5, ScreenPosition.Y + ScreenSize.Y)
                         end
@@ -218,6 +262,7 @@ RunService.Heartbeat:Connect(function()
                 end
             end
         end
+        
         ESP.Drawing.Box.Main.Visible = (OnScreen and IsAlive and not ESP.Config.IsEnemy and ESP.Config.BoxVisible) or (OnScreen and IsAlive and InEnemyTeam and ESP.Config.BoxVisible)
         ESP.Drawing.Box.Outline.Visible = ESP.Drawing.Box.Main.Visible
         ESP.Drawing.HeadCircle.Visible = (OnScreen and IsAlive and not ESP.Config.IsEnemy and ESP.Config.HeadCircleVisible) or (OnScreen and IsAlive and InEnemyTeam and ESP.Config.HeadCircleVisible)
