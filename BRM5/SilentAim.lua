@@ -53,7 +53,7 @@ if not NPCFolder then
 end
 
 -- helpful modules
-local ModulesDebug = true
+local ModulesDebug = false
 local ESPLibrary = ModulesDebug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
 local ConfigSystem = ModulesDebug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
 
