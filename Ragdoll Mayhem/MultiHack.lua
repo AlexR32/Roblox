@@ -1,7 +1,7 @@
 -- script execute checks
 repeat task.wait() until game.IsLoaded
 local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/TypeWriter.lua"))()
-if getgenv().MultihackExecuted then NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> script already executed",15,0) return end
+if getgenv().MultihackExecuted then NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(63,126,252)\"><b>ⓘ</b></font></font> script already executed",15,0) return end
 getgenv().MultihackExecuted = true
 
 -- dependencies
@@ -20,10 +20,10 @@ local Aimbot = false
 
 -- various checks and QOT
 if not LocalPlayer then
-    NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find localplayer, making finding loop...",15,0)
+    --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find localplayer, making finding loop...",15,0)
     while task.wait() do
         if PlayerService.LocalPlayer then
-            NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> localplayer founded",15,0)
+            --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> localplayer founded",15,0)
             LocalPlayer = PlayerService.LocalPlayer
             break
         end
@@ -32,7 +32,7 @@ end
 
 LocalPlayer.OnTeleport:Connect(function(State)
     if State == Enum.TeleportState.Started then
-        NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> queue on teleport started",15,0)
+        --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> queue on teleport started",15,0)
         getgenv().MultihackExecuted = false
         local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
         QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/Ragdoll%20Mayhem/MultiHack.lua"))
@@ -40,17 +40,19 @@ LocalPlayer.OnTeleport:Connect(function(State)
 end)
 
 if not Workspace:FindFirstChild("Drops") or not Workspace:FindFirstChild("Projectiles") then
-    NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> cant find required folders, making finding loop...",15,0)
+    --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find required folders, making finding loop...",15,0)
     while task.wait() do
         if Workspace:FindFirstChild("Drops") and Workspace:FindFirstChild("Projectiles") then
-            NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> required folders founded",15,0)
+            --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> required folders founded",15,0)
             break
         end
     end
 end
 
-local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
-local ConfigSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
+-- helpful modules
+local ModulesDebug = false
+local ESPLibrary = ModulesDebug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
+local ConfigSystem = ModulesDebug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
 
 -- config system
 local function SaveConfig()
@@ -81,18 +83,20 @@ getgenv().Config = {
     },
 
     PlayerESP = {
-        AllyColor = Color3.fromRGB(64,255,64),
-        EnemyColor = Color3.fromRGB(255,64,64),
+        AllyColor = Color3.fromRGB(63,252,63),
+        EnemyColor = Color3.fromRGB(252,63,63),
 
         HeadCircleVisible = false,
         HeadCircleFilled = true,
-        HeadCircleRadius = 4,
+        HeadCircleAutoScale = true,
+        HeadCircleRadius = 8,
         HeadCircleNumSides = 4,
 
         IsEnemy = false,
         TeamColor = false,
         BoxVisible = false,
         TextVisible = false,
+        TextAutoScale = true,
         TextSize = 16
     },
 
@@ -132,7 +136,7 @@ local Window = Library({Name = "RAGDOLL UNIVERSE Multihack",Enabled = Config.UI.
             end}):AddBind({Key = Config.Binds.SilentAim,Mouse = true,Callback = function(Bool,Key)
                 Config.Binds.SilentAim = Key or "NONE"
             end})
-            AimbotSection:AddToggle({Name = "WallCheck",Value = Config.WallCheck,Callback = function(Bool)
+            AimbotSection:AddToggle({Name = "Wallcheck",Value = Config.WallCheck,Callback = function(Bool)
                 Config.WallCheck = Bool
             end})
             AimbotSection:AddSlider({Name = "Sensitivity",Min = 0,Max = 1,Precise = 2,Value = Config.Sensitivity,Callback = function(Number)
@@ -164,6 +168,9 @@ local Window = Library({Name = "RAGDOLL UNIVERSE Multihack",Enabled = Config.UI.
             PlayerESPSection:AddToggle({Name = "Text",Value = Config.PlayerESP.TextVisible,Callback = function(Bool)
                 Config.PlayerESP.TextVisible = Bool
             end})
+            PlayerESPSection:AddToggle({Name = "Text Autoscale",Value = Config.PlayerESP.TextAutoScale,Callback = function(Bool)
+                Config.PlayerESP.TextAutoScale = Bool
+            end})
             PlayerESPSection:AddSlider({Name = "Text Size",Min = 14,Max = 30,Value = Config.PlayerESP.TextSize,Callback = function(Number)
                 Config.PlayerESP.TextSize = Number
             end})
@@ -173,6 +180,9 @@ local Window = Library({Name = "RAGDOLL UNIVERSE Multihack",Enabled = Config.UI.
             end})
             PlayerESPSection:AddToggle({Name = "Filled",Value = Config.PlayerESP.HeadCircleFilled,Callback = function(Bool)
                 Config.PlayerESP.HeadCircleFilled = Bool
+            end})
+            PlayerESPSection:AddToggle({Name = "Autoscale",Value = Config.PlayerESP.HeadCircleAutoScale,Callback = function(Bool)
+                Config.PlayerESP.HeadCircleAutoScale = Bool
             end})
             PlayerESPSection:AddSlider({Name = "Radius",Min = 1,Max = 10,Value = Config.PlayerESP.HeadCircleRadius,Callback = function(Number)
                 Config.PlayerESP.HeadCircleRadius = Number
@@ -228,7 +238,7 @@ local Window = Library({Name = "RAGDOLL UNIVERSE Multihack",Enabled = Config.UI.
             if #x > 0 then
                 game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, x[math.random(1, #x)])
             else
-                return NotifyLib.TypeWrite("<font color=\"rgb(255,128,64)\"><b>warn</b></font><b>:</b> couldn't find a server",15,0)
+                NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> couldn't find a server",15,0)
             end
         end})
         SettingsTab:AddButton({Name = "Join Discord Server",Side = "Left",Callback = function()
@@ -322,15 +332,15 @@ local function TeamCheck(Player)
     return true
 end
 
-local function WallCheck(Target)
-    if Config.WallCheck then
+local function WallCheck(Hitbox, Character)
+    if Config.WallCheck and Character then
         local Camera = Workspace.CurrentCamera
         local RaycastParameters = RaycastParams.new()
         RaycastParameters.FilterType = Enum.RaycastFilterType.Blacklist
-        RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character,Target}
+        RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character,Character}
         RaycastParameters.IgnoreWater = true
         
-        if Workspace:Raycast(Camera.CFrame.Position, Target.Position - Camera.CFrame.Position, RaycastParameters) then
+        if Workspace:Raycast(Camera.CFrame.Position, Hitbox.Position - Camera.CFrame.Position, RaycastParameters) then
             return false
         end
     end
@@ -349,6 +359,27 @@ local function GetTarget()
         if Target ~= LocalPlayer and Hitbox and Health and TeamCheck(Target) then
             local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Hitbox.Position)
             local Magnitude = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
+            if OnScreen and WallCheck(Hitbox, Character) and FieldOfView > Magnitude then
+                FieldOfView = Magnitude
+                ClosestTarget = Hitbox
+            end
+        end
+    end
+
+    return ClosestTarget
+end
+
+local function GetDummyTarget()
+    local Camera = Workspace.CurrentCamera
+    local FieldOfView = Config.FieldOfView
+    local ClosestTarget = nil
+
+    for Index, Target in pairs(Workspace.LiveRagdolls:GetChildren()) do
+        local Hitbox = Target:FindFirstChild(Config.AimHitbox) or (Target:IsA("Model") and Target.PrimaryPart)
+        local Health = Target:FindFirstChildOfClass("Humanoid") and Target:FindFirstChildOfClass("Humanoid").Health > 0
+        if Hitbox and Health then
+            local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Hitbox.Position)
+            local Magnitude = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
             if OnScreen and WallCheck(Hitbox) and FieldOfView > Magnitude then
                 FieldOfView = Magnitude
                 ClosestTarget = Hitbox
@@ -360,15 +391,15 @@ local function GetTarget()
 end
 
 -- silent aim hook
-local namecall
+local namecall = nil
 namecall = hookmetamethod(game, "__namecall", function(self, ...)
     local namecallmethod = getnamecallmethod()
     local args = {...}
     if namecallmethod == "FindPartOnRayWithIgnoreList" then
-        if Target and Config.SilentAim then
-            local Camera = Workspace.CurrentCamera
-            if table.find(args[2],LocalPlayer.Character,1) and table.find(args[2],Workspace.Drops,3) and table.find(args[2],Workspace.Drops,4) and table.find(args[2],Workspace.Projectiles,5) then
-                args[1] = Ray.new(Camera.CFrame.Position, Target.Position - Camera.CFrame.Position)
+        if table.find(args[2],LocalPlayer.Character,1) and table.find(args[2],Workspace.Drops,3) and table.find(args[2],Workspace.Drops,4) and table.find(args[2],Workspace.Projectiles,5) then
+            if Config.SilentAim and Target then
+                local Camera = Workspace.CurrentCamera
+                args[1] = Ray.new(args[1].Origin, Target.Position - Camera.CFrame.Position)
             end
         end
     end
@@ -388,13 +419,13 @@ RunService.RenderStepped:Connect(function()
         Circle.Filled = Config.Circle.Filled
         Circle.Position = UserInputService:GetMouseLocation()
     end
-
+    
+    --Target = (Aimbot or Config.SilentAim) and GetDummyTarget()
     if Aimbot or Config.SilentAim then
         Target = GetTarget()
     else
         Target = nil
     end
-
     if Aimbot and Target then
         local Camera = Workspace.CurrentCamera
         local Mouse = UserInputService:GetMouseLocation()
