@@ -53,8 +53,9 @@ if not NPCFolder then
 end
 
 -- helpful modules
-local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
-local ConfigSystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
+local ModulesDebug = true
+local ESPLibrary = ModulesDebug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
+local ConfigSystem = ModulesDebug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
 
 -- config system
 local function SaveConfig()
@@ -85,31 +86,34 @@ getgenv().Config = {
     },
 
     PlayerESP = {
-        AllyColor = Color3.fromRGB(64,255,64),
-        EnemyColor = Color3.fromRGB(255,64,64),
+        AllyColor = Color3.fromRGB(63,252,63),
+        EnemyColor = Color3.fromRGB(252,63,63),
 
         HeadCircleVisible = false,
         HeadCircleFilled = true,
-        HeadCircleRadius = 4,
+        HeadCircleAutoScale = true,
+        HeadCircleRadius = 8,
         HeadCircleNumSides = 4,
 
         IsEnemy = false,
         TeamColor = false,
         BoxVisible = false,
         TextVisible = false,
+        TextAutoScale = true,
         TextSize = 16
     },
     NPCESP = {
-        EnemyColor = Color3.fromRGB(255,64,64),
+        EnemyColor = Color3.fromRGB(252,63,63),
 
         HeadCircleVisible = false,
         HeadCircleFilled = true,
         HeadCircleRadius = 4,
         HeadCircleNumSides = 4,
 
+        Name = "Enemy NPC",
         BoxVisible = false,
         TextVisible = false,
-        Name = "Enemy NPC",
+        TextAutoScale = true,
         TextSize = 16
     },
 
@@ -177,7 +181,7 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             end}):AddBind({Key = Config.Binds.SilentAim,Mouse = true,Callback = function(Bool,Key)
                 Config.Binds.SilentAim = Key or "NONE"
             end})
-            AimbotSection:AddToggle({Name = "WallCheck",Value = Config.WallCheck,Callback = function(Bool)
+            AimbotSection:AddToggle({Name = "Wallcheck",Value = Config.WallCheck,Callback = function(Bool)
                 Config.WallCheck = Bool
             end})
             AimbotSection:AddSlider({Name = "Sensitivity",Min = 0,Max = 1,Precise = 2,Value = Config.Sensitivity,Callback = function(Number)
@@ -206,7 +210,10 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             NPCESPSection:AddToggle({Name = "Text",Value = Config.NPCESP.TextVisible,Callback = function(Bool)
                 Config.NPCESP.TextVisible = Bool
             end})
-            NPCESPSection:AddSlider({Name = "Text Size",Min = 14,Max = 30,Value = Config.NPCESP.TextSize,Callback = function(Number)
+            NPCESPSection:AddToggle({Name = "Text Autoscale",Value = Config.NPCESP.TextAutoScale,Callback = function(Bool)
+                Config.NPCESP.TextAutoScale = Bool
+            end})
+            NPCESPSection:AddSlider({Name = "Text Size",Min = 14,Max = 28,Value = Config.NPCESP.TextSize,Callback = function(Number)
                 Config.NPCESP.TextSize = Number
             end})
             NPCESPSection:AddTextbox({Name = "NPC Name",Text = Config.NPCESP.Name,Placeholder = "NPC Name",Callback = function(String)
@@ -219,9 +226,13 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             NPCESPSection:AddToggle({Name = "Filled",Value = Config.NPCESP.HeadCircleFilled,Callback = function(Bool)
                 Config.NPCESP.HeadCircleFilled = Bool
             end})
+            NPCESPSection:AddToggle({Name = "Autoscale",Value = Config.NPCESP.HeadCircleAutoScale,Callback = function(Bool)
+                Config.NPCESP.HeadCircleAutoScale = Bool
+            end})
             NPCESPSection:AddSlider({Name = "Radius",Min = 1,Max = 10,Value = Config.NPCESP.HeadCircleRadius,Callback = function(Number)
                 Config.NPCESP.HeadCircleRadius = Number
             end})
+            
             NPCESPSection:AddSlider({Name = "NumSides",Min = 3,Max = 100,Value = Config.NPCESP.HeadCircleNumSides,Callback = function(Number)
                 Config.NPCESP.HeadCircleNumSides = Number
             end})
@@ -245,7 +256,10 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             PlayerESPSection:AddToggle({Name = "Text",Value = Config.PlayerESP.TextVisible,Callback = function(Bool)
                 Config.PlayerESP.TextVisible = Bool
             end})
-            PlayerESPSection:AddSlider({Name = "Text Size",Min = 14,Max = 30,Value = Config.PlayerESP.TextSize,Callback = function(Number)
+            PlayerESPSection:AddToggle({Name = "Text Autoscale",Value = Config.PlayerESP.TextAutoScale,Callback = function(Bool)
+                Config.PlayerESP.TextAutoScale = Bool
+            end})
+            PlayerESPSection:AddSlider({Name = "Text Size",Min = 14,Max = 28,Value = Config.PlayerESP.TextSize,Callback = function(Number)
                 Config.PlayerESP.TextSize = Number
             end})
             PlayerESPSection:AddDivider({Text = "Head Circle"})
@@ -254,6 +268,9 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             end})
             PlayerESPSection:AddToggle({Name = "Filled",Value = Config.PlayerESP.HeadCircleFilled,Callback = function(Bool)
                 Config.PlayerESP.HeadCircleFilled = Bool
+            end})
+            PlayerESPSection:AddToggle({Name = "Autoscale",Value = Config.PlayerESP.HeadCircleAutoScale,Callback = function(Bool)
+                Config.PlayerESP.HeadCircleAutoScale = Bool
             end})
             PlayerESPSection:AddSlider({Name = "Radius",Min = 1,Max = 10,Value = Config.PlayerESP.HeadCircleRadius,Callback = function(Number)
                 Config.PlayerESP.HeadCircleRadius = Number
@@ -456,21 +473,18 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
 end
 
 local function TeamCheck(Target)
-    if LocalPlayer.Team == Target.Team then
-        return false
-    end
-    return true
+    return LocalPlayer.Team ~= Target.Team
 end
 
-local function WallCheck(Target)
-    if Config.WallCheck then
+local function WallCheck(Hitbox, Character)
+    if Config.WallCheck and Character then
         local Camera = Workspace.CurrentCamera
         local RaycastParameters = RaycastParams.new()
         RaycastParameters.FilterType = Enum.RaycastFilterType.Blacklist
-        RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character,Target}
+        RaycastParameters.FilterDescendantsInstances = {LocalPlayer.Character,Character}
         RaycastParameters.IgnoreWater = true
         
-        if Workspace:Raycast(Camera.CFrame.Position, Target.Position - Camera.CFrame.Position, RaycastParameters) then
+        if Workspace:Raycast(Camera.CFrame.Position, Hitbox.Position - Camera.CFrame.Position, RaycastParameters) then
             return false
         end
     end
@@ -489,7 +503,7 @@ local function GetTarget()
             if Hitbox and Health then
                 local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Hitbox.Position)
                 local Magnitude = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
-                if OnScreen and WallCheck(Hitbox) and FieldOfView > Magnitude then
+                if OnScreen and WallCheck(Hitbox, Target) and FieldOfView > Magnitude then
                     FieldOfView = Magnitude
                     ClosestTarget = Hitbox
                 end
@@ -503,7 +517,7 @@ local function GetTarget()
             if Target ~= LocalPlayer and Hitbox and Health and TeamCheck(Target) then
                 local ScreenPosition, OnScreen = Camera:WorldToViewportPoint(Hitbox.Position)
                 local Magnitude = (Vector2.new(ScreenPosition.X, ScreenPosition.Y) - UserInputService:GetMouseLocation()).Magnitude
-                if OnScreen and WallCheck(Hitbox) and FieldOfView > Magnitude then
+                if OnScreen and WallCheck(Hitbox, Character) and FieldOfView > Magnitude then
                     FieldOfView = Magnitude
                     ClosestTarget = Hitbox
                 end
