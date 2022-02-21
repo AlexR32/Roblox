@@ -5,6 +5,7 @@ if getgenv().MultihackExecuted then NotifyLib.TypeWrite("<font size=\"30\"><font
 getgenv().MultihackExecuted = true
 
 -- dependencies
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
@@ -38,6 +39,15 @@ LocalPlayer.OnTeleport:Connect(function(State)
         QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BadBusiness/Multihack.lua"))
     end
 end)
+if not ReplicatedStorage:FindFirstChild("TS") then
+    --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find enemies, making finding loop...",15,0)
+    while task.wait() do
+        if ReplicatedStorage:FindFirstChild("TS") then
+            --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> enemies founded",15,0)
+            break
+        end
+    end
+end
 
 -- helpful modules
 local ModulesDebug = false
