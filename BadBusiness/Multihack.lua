@@ -35,7 +35,7 @@ LocalPlayer.OnTeleport:Connect(function(State)
         --NotifyLib.TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> queue on teleport started",15,0)
         getgenv().MultihackExecuted = false
         local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
-        --QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BRM5/SilentAim.lua"))
+        QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BadBusiness/Multihack.lua"))
     end
 end)
 
@@ -140,7 +140,7 @@ local Window = Library({Name = "Bad Business Multihack",Enabled = Config.UI.Enab
             AimbotSection:AddSlider({Name = "Field Of View",Min = 0,Max = 500,Value = Config.FieldOfView,Callback = function(Number)
                 Config.FieldOfView = Number
             end})
-            AimbotSection:AddDropdown({Name = "Hitbox",Default = Config.AimHitbox,List = {"Head", "HumanoidRootPart"},Callback = function(String)
+            AimbotSection:AddDropdown({Name = "Priority",Default = Config.AimHitbox,List = {"Head","Neck","Chest","Abdomen","Hips"},Callback = function(String)
                 Config.AimHitbox = String
             end})
         end
