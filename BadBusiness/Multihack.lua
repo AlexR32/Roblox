@@ -39,7 +39,8 @@ LocalPlayer.OnTeleport:Connect(function(State)
         QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BadBusiness/Multihack.lua"))
     end
 end)
-if not ReplicatedStorage:FindFirstChild("TS") then
+local Toroiseshell = ReplicatedStorage:FindFirstChild("TS")
+if not Toroiseshell then
     --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find enemies, making finding loop...",15,0)
     while task.wait() do
         if ReplicatedStorage:FindFirstChild("TS") then
@@ -48,6 +49,7 @@ if not ReplicatedStorage:FindFirstChild("TS") then
         end
     end
 end
+Toroiseshell = require(ReplicatedStorage:FindFirstChild("TS"))
 
 -- helpful modules
 local ModulesDebug = false
@@ -136,7 +138,7 @@ local Window = Library({Name = "Bad Business Multihack",Enabled = Config.UI.Enab
                 Config.Binds.Aimbot = Key or "NONE"
                 Aimbot = Bool
             end})
-            AimbotSection:AddToggle({Name = "Silent Aim",Value = Config.SilentAim,Callback = function(Bool)
+            AimbotSection:AddToggle({Name = "Silent Aim (WIP USE AT YOUR OWN RISK)",Value = Config.SilentAim,Callback = function(Bool)
                 Config.SilentAim = Bool
             end}):AddBind({Key = Config.Binds.SilentAim,Mouse = true,Callback = function(Bool,Key)
                 Config.Binds.SilentAim = Key or "NONE"
@@ -368,22 +370,18 @@ local function GetTarget()
 end
 
 -- silent aim hook
---[[
-local namecall
-namecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local namecallmethod = getnamecallmethod()
+local Fire = Toroiseshell.Network.Fire
+Toroiseshell.Network.Fire = function(self, ...)
     local args = {...}
-    if namecallmethod == "Raycast" then
-        local Camera = Workspace.CurrentCamera
-        if Config.SilentAim and Target then
-            if args[1] == Camera.CFrame.Position then
-                args[2] = Target.Position - Camera.CFrame.Position
-            end
+    if Config.SilentAim and Target then
+        if args[2] == "__Hit" then
+            args[4] = Target.Position
+            args[5] = Target
         end
     end
-    return namecall(self, unpack(args))
-end)
-]]
+    return Fire(self, unpack(args))
+end
+
 -- circle and aim assist heartbeat loop
 local Circle = Drawing.new("Circle")
 RunService.Heartbeat:Connect(function()
