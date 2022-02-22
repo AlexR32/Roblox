@@ -1,79 +1,89 @@
 local Module = {}
 
-local function GetLongest(Number1,Number2)
-	if Number1 > Number2 then
-		return Number1
+local CoreGui = game:GetService("CoreGui")
+local Screen = CoreGui:FindFirstChild("NotificationScreen")
+local Folder = game:GetObjects("rbxassetid://7231968281")[1]
+if not Screen then
+	Screen = Folder.NotificationScreen:Clone()
+	Screen.Parent = CoreGui
+end
+
+local function GetType(Variant, Type)
+	if type(Type) == "table" then
+		for Index, Value in ipairs(Type) do
+			if typeof(Variant) == Value then
+				return Variant
+			end
+		end
 	else
-		return Number2
+		if typeof(Variant) == Type then
+			return Variant
+		end
 	end
 end
 
-function Module.Notification(Title,Text,Duration)
-	local CoreGui = game:GetService("CoreGui")
-	local Screen = CoreGui:FindFirstChild("NotificationScreen")
-	local Folder = game:GetObjects("rbxassetid://7231968281")[1]
-	if not Screen then
-		Screen = Folder.NotificationScreen:Clone()
-		Screen.Parent = CoreGui
-	end
-	
-	for Index,OldNotification in pairs(Screen.Container:GetChildren()) do
-		local Position = UDim2.new(1,0,1,(OldNotification.Position.Y.Offset - OldNotification.Size.Y.Offset) - 10)
-		OldNotification:TweenPosition(Position,Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,0.1,true)
-	end
+local function GetLongest(A,B)
+	return A > B and A or B
+end
+
+function Module:Notification(Title,Description,Duration,Callback)
+	Title = GetType(Title,{"string","number"}) or "Title"
+	Description = GetType(Description,{"string","number"}) or "Description"
+	Callback = GetType(Callback,"function")
 	
 	local Notification = Folder.Notification:Clone()
 	Notification.Parent = Screen.Container
 	Notification.Title.Text = Title
-	Notification.Text.Text = Text
-	Notification.Title.Size = UDim2.new(1,-10,0,Notification.Title.TextBounds.Y)
-	Notification.Text.Position = UDim2.new(0.5,0,0,Notification.Title.Size.Y.Offset + 5)
-	Notification.Text.Size = UDim2.new(1,-10,0,Notification.Text.TextBounds.Y)
-	Notification.Size = UDim2.new(0,GetLongest(Notification.Title.TextBounds.X,Notification.Text.TextBounds.X) + 10,0,(Notification.Title.Size.Y.Offset + Notification.Text.Size.Y.Offset) + 10)
-	Notification.Position = UDim2.new(1,Notification.Size.X.Offset + 10,1,0)
-	Notification:TweenPosition(UDim2.new(1,0,1,0),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,0.1,true)
+	Notification.Description.Text = Description
+	Notification.Title.Size = UDim2.new(1,0,0,Notification.Title.TextBounds.Y)
+	Notification.Description.Size = UDim2.new(1,0,0,Notification.Description.TextBounds.Y)
+	Notification.Size = UDim2.new(0,GetLongest(Notification.Title.TextBounds.X,Notification.Description.TextBounds.X) + 24,0,Notification.ListLayout.AbsoluteContentSize.Y + 8)
 	
-	task.delay(Duration,function()
-		Notification:TweenPosition(UDim2.new(1,Notification.Size.X.Offset + 10,1,Notification.Position.Y.Offset),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,0.1,true)
-		task.wait(0.25)
-		Notification:Destroy()
-	end)
+	if Duration then
+		task.spawn(function()
+			for Time = Duration,1,-1 do
+				Notification.Title.Close.Text = Time
+				task.wait(1)
+			end
+			Notification.Title.Close.Text = 0
+			
+			if Callback then
+				Callback()
+			end
+			Notification:Destroy()
+		end)
+	else
+		Notification.Title.Close.MouseButton1Click:Connect(function()
+			Notification:Destroy()
+		end)
+	end
 end
 
-function Module.TypeWrite(Text,Duration,Duration2)
-	--coroutine.wrap(function()
-		local CoreGui = game:GetService("CoreGui")
-		local Screen = CoreGui:FindFirstChild("NotificationScreen")
-		local Folder = game:GetObjects("rbxassetid://7231968281")[1]
-		if not Screen then
-			Screen = Folder.NotificationScreen:Clone()
-			Screen.Parent = CoreGui
-		end
+function Module:TypeWrite(Text,Duration,Duration2)
+	local Message = Folder.Message:Clone()
+	Message.Parent = Screen.TypeWriter
+	Message.Text = Text
+	Message.Size = UDim2.new(1,0,0,Message.TextBounds.Y)
 
-		local Message = Folder.Message:Clone()
-		Message.Parent = Screen.TypeWriter
-		Message.Text = Text
-		Message.Size = UDim2.new(1,0,0,Message.TextBounds.Y)
-
-		local Index = 0
-		local DisplayText = Text
-		DisplayText = DisplayText:gsub("<br%s*/>", "\n")
-		DisplayText = DisplayText:gsub("<[^<>]->", "")
-
+	local Index = 0
+	local DisplayText = Text
+	DisplayText = DisplayText:gsub("<br%s*/>", "\n")
+	DisplayText = DisplayText:gsub("<[^<>]->", "")
+	
+	task.spawn(function()
 		for _ in utf8.graphemes(DisplayText) do
 			Index = Index + 1
 			Message.MaxVisibleGraphemes = Index
 			task.wait(Duration2)
 		end
-		task.delay(Duration,function()
-			for _ in utf8.graphemes(DisplayText) do
-				Index = Index - 1
-				Message.MaxVisibleGraphemes = Index
-				task.wait(Duration2)
-			end
-			Message:Destroy()
-		end)
-	--end)()
+		task.wait(Duration)
+		for _ in utf8.graphemes(DisplayText) do
+			Index = Index - 1
+			Message.MaxVisibleGraphemes = Index
+			task.wait(Duration2)
+		end
+		Message:Destroy()
+	end)
 end
 
 return Module
