@@ -107,7 +107,8 @@ getgenv().Config = {
 
         HeadCircleVisible = false,
         HeadCircleFilled = true,
-        HeadCircleRadius = 4,
+        HeadCircleAutoScale = true,
+        HeadCircleRadius = 8,
         HeadCircleNumSides = 4,
 
         Name = "Enemy NPC",
@@ -146,7 +147,7 @@ getgenv().Config = {
 
     EnvEnable = false,
     EnvTime = 12,
-    EnvBrightness = 2,
+    --EnvBrightness = 2,
     EnvFog = 0.25,
 
     NoRecoil = false,
@@ -307,9 +308,11 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             OtherSection:AddSlider({Name = "Clock Time",Min = 0,Max = 24,Value = Config.EnvTime,Callback = function(Number)
                 Config.EnvTime = Number
             end})
+            --[[
             OtherSection:AddSlider({Name = "Brightness",Min = 0,Max = 10,Value = Config.EnvBrightness,Callback = function(Number)
                 Config.EnvBrightness = Number
             end})
+            ]]
             OtherSection:AddSlider({Name = "Fog Density",Min = 0,Max = 1,Value = Config.EnvFog,Precise = 2,Callback = function(Number)
                 Config.EnvFog = Number
             end})
@@ -723,14 +726,35 @@ if TurretMovement and turretOld then
     end
 end
 
+local EnvironmentService = requireGameModule("EnvironmentService")
+local environmentOld
+while task.wait() do
+    if EnvironmentService and EnvironmentService.Update then
+        environmentOld = EnvironmentService.Update
+        break
+    else
+        EnvironmentService = requireGameModule("EnvironmentService")
+    end
+end
+if EnvironmentService and environmentOld then
+    EnvironmentService.Update = function(...)
+        local args = {...}
+        if Config.EnvEnable then
+            args[1]._atmoshperes.Default.Density = Config.EnvFog
+            args[1]._atmoshperes.Desert.Density = Config.EnvFog
+            args[1]._atmoshperes.Snow.Density = Config.EnvFog
+        end
+        return environmentOld(...)
+    end
+end
+
 -- silent aim hook
 local namecall
 namecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local namecallmethod = getnamecallmethod()
     local args = {...}
-    if namecallmethod == "Raycast" then
-        local Camera = Workspace.CurrentCamera
+    if getnamecallmethod() == "Raycast" then
         if Config.SilentAim and Target then
+            local Camera = Workspace.CurrentCamera
             if Config.SAMode == "Gun" and args[1] == Camera.CFrame.Position then
                 args[2] = Target.Position - Camera.CFrame.Position
             elseif Config.SAMode == "Aircraft" and AircraftTip and args[1] == AircraftTip.WorldCFrame.Position then
@@ -772,11 +796,11 @@ RunService.Heartbeat:Connect(function()
 
     if Config.EnvEnable then
         Lighting.ClockTime = Config.EnvTime
-        Lighting.Brightness = Config.EnvBrightness
-        Lighting.Atmosphere.Density = Config.EnvFog
-    else
-        Lighting.Brightness = 2
-        Lighting.Atmosphere.Density = 0.25
+        --Lighting.Brightness = Config.EnvBrightness
+        --Lighting.Atmosphere.Density = Config.EnvFog
+    --else
+        --Lighting.Brightness = 2
+        --Lighting.Atmosphere.Density = 0.25
     end
 end)
 
