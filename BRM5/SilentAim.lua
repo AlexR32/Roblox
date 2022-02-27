@@ -9,30 +9,20 @@ getgenv().MultihackExecuted = true
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local PlayerService = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
 
-local PlayerService = game:GetService("Players")
+repeat task.wait() until PlayerService.LocalPlayer
 local LocalPlayer = PlayerService.LocalPlayer
-local Camera = Workspace.CurrentCamera
 
--- variables
+repeat task.wait() until Workspace:FindFirstChild("Enemies")
+local NPCFolder = Workspace.Enemies
+
 local Target, Aimbot, Debug, GroundTip, AircraftTip = nil, false, false, nil, nil
 
--- various checks and QOT
-if not LocalPlayer then
-    --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find localplayer, making finding loop...",15,0)
-    while task.wait() do
-        if PlayerService.LocalPlayer then
-            --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> localplayer founded",15,0)
-            LocalPlayer = PlayerService.LocalPlayer
-            break
-        end
-    end
-end
 LocalPlayer.OnTeleport:Connect(function(State)
     if State == Enum.TeleportState.Started then
-        --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> queue on teleport started",15,0)
         getgenv().MultihackExecuted = false
         if not Debug then
             local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
@@ -40,21 +30,11 @@ LocalPlayer.OnTeleport:Connect(function(State)
         end
     end
 end)
-local NPCFolder = Workspace:FindFirstChild("Enemies")
-if not NPCFolder then
-    --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find enemies, making finding loop...",15,0)
-    while task.wait() do
-        if Workspace:FindFirstChild("Enemies") then
-            --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> enemies founded",15,0)
-            NPCFolder = Workspace:FindFirstChild("Enemies")
-            break
-        end
-    end
-end
 
 -- helpful modules
 local ESPLibrary = Debug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
 local ConfigSystem = Debug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/Cursor.lua"))()
 
 -- config system
 local function SaveConfig()
