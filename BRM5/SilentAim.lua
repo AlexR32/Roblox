@@ -1,6 +1,7 @@
 -- script execute checks
 repeat task.wait() until game.IsLoaded
 local NotifyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/TypeWriter.lua"))()
+if not getloadedmodules then NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> your exploit is not supported",15,0) return end
 if getgenv().MultihackExecuted then NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(63,126,252)\"><b>ⓘ</b></font></font> script already executed",15,0) return end
 getgenv().MultihackExecuted = true
 
@@ -16,10 +17,7 @@ local LocalPlayer = PlayerService.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
 -- variables
-local Target = nil
-local Aimbot = false
-local GroundTip = nil
-local AircraftTip = nil
+local Target, Aimbot, Debug, GroundTip, AircraftTip = nil, false, false, nil, nil
 
 -- various checks and QOT
 if not LocalPlayer then
@@ -36,8 +34,10 @@ LocalPlayer.OnTeleport:Connect(function(State)
     if State == Enum.TeleportState.Started then
         --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> queue on teleport started",15,0)
         getgenv().MultihackExecuted = false
-        local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
-        QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BRM5/SilentAim.lua"))
+        if not Debug then
+            local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
+            QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BRM5/SilentAim.lua"))
+        end
     end
 end)
 local NPCFolder = Workspace:FindFirstChild("Enemies")
@@ -53,9 +53,8 @@ if not NPCFolder then
 end
 
 -- helpful modules
-local ModulesDebug = false
-local ESPLibrary = ModulesDebug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
-local ConfigSystem = ModulesDebug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
+local ESPLibrary = Debug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
+local ConfigSystem = Debug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
 
 -- config system
 local function SaveConfig()
@@ -95,6 +94,11 @@ getgenv().Config = {
         HeadCircleRadius = 8,
         HeadCircleNumSides = 4,
 
+        HighlightVisible = false,
+        HTransparency = 0.5,
+        HOutlineColor = Color3.fromRGB(255,255,255),
+        HOutlineTransparency = 1,
+
         IsEnemy = false,
         TeamColor = false,
         BoxVisible = false,
@@ -110,6 +114,11 @@ getgenv().Config = {
         HeadCircleAutoScale = true,
         HeadCircleRadius = 8,
         HeadCircleNumSides = 4,
+
+        HighlightVisible = false,
+        HTransparency = 0.5,
+        HOutlineColor = Color3.fromRGB(255,255,255),
+        HOutlineTransparency = 1,
 
         Name = "Enemy NPC",
         BoxVisible = false,
@@ -191,13 +200,15 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             AimbotSection:AddSlider({Name = "Field Of View",Min = 0,Max = 500,Value = Config.FieldOfView,Callback = function(Number)
                 Config.FieldOfView = Number
             end})
+            --[[
             AimbotSection:AddDropdown({Name = "Silent Aim Mode",Default = Config.SAMode,List = {"Gun", "Turret", "Aircraft"},Callback = function(String)
                 Config.SAMode = String
             end})
+            ]]
             AimbotSection:AddDropdown({Name = "Target",Default = Config.TargetMode,List = {"NPC", "Player"},Callback = function(String)
                 Config.TargetMode = String
             end})
-            AimbotSection:AddDropdown({Name = "Priority",Default = Config.AimHitbox,List = {"Head", "HumanoidRootPart"},Callback = function(String)
+            AimbotSection:AddDropdown({Name = "Priority",Default = Config.AimHitbox,List = {"Head", "HumanoidRootPart", "UpperTorso", "LowerTorso"},Callback = function(String)
                 Config.AimHitbox = String
             end})
         end
@@ -233,10 +244,24 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             NPCESPSection:AddSlider({Name = "Radius",Min = 1,Max = 10,Value = Config.NPCESP.HeadCircleRadius,Callback = function(Number)
                 Config.NPCESP.HeadCircleRadius = Number
             end})
-            
             NPCESPSection:AddSlider({Name = "NumSides",Min = 3,Max = 100,Value = Config.NPCESP.HeadCircleNumSides,Callback = function(Number)
                 Config.NPCESP.HeadCircleNumSides = Number
             end})
+            --[[
+            NPCESPSection:AddDivider({Text = "Highlight (WIP)"})
+            NPCESPSection:AddToggle({Name = "Enable",Value = Config.NPCESP.HighlightVisible,Callback = function(Bool)
+                Config.NPCESP.HighlightVisible = Bool
+            end})
+            NPCESPSection:AddColorpicker({Name = "Outline Color",Color = Config.NPCESP.HOutlineColor,Callback = function(Color)
+                Config.NPCESP.HOutlineColor = Color
+            end})
+            NPCESPSection:AddSlider({Name = "Transparency",Min = 0,Max = 1,Precise = 2,Value = Config.NPCESP.HTransparency,Callback = function(Number)
+                Config.NPCESP.HTransparency = Number
+            end})
+            NPCESPSection:AddSlider({Name = "Outline Transparency",Min = 0,Max = 1,Precise = 2,Value = Config.NPCESP.HOutlineTransparency,Callback = function(Number)
+                Config.NPCESP.HOutlineTransparency = Number
+            end})
+            ]]
         end
         local PlayerESPSection = MainTab:AddSection({Name = "Player ESP",Side = "Left"}) do
             PlayerESPSection:AddColorpicker({Name = "Ally Color",Color = Config.PlayerESP.AllyColor,Callback = function(Color)
@@ -279,6 +304,21 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             PlayerESPSection:AddSlider({Name = "NumSides",Min = 3,Max = 100,Value = Config.PlayerESP.HeadCircleNumSides,Callback = function(Number)
                 Config.PlayerESP.HeadCircleNumSides = Number
             end})
+            --[[
+            PlayerESPSection:AddDivider({Text = "Highlight (WIP)"})
+            PlayerESPSection:AddToggle({Name = "Enable",Value = Config.PlayerESP.HighlightVisible,Callback = function(Bool)
+                Config.PlayerESP.HighlightVisible = Bool
+            end})
+            PlayerESPSection:AddColorpicker({Name = "Outline Color",Color = Config.PlayerESP.HOutlineColor,Callback = function(Color)
+                Config.PlayerESP.HOutlineColor = Color
+            end})
+            PlayerESPSection:AddSlider({Name = "Transparency",Min = 0,Max = 1,Precise = 2,Value = Config.PlayerESP.HTransparency,Callback = function(Number)
+                Config.PlayerESP.HTransparency = Number
+            end})
+            PlayerESPSection:AddSlider({Name = "Outline Transparency",Min = 0,Max = 1,Precise = 2,Value = Config.PlayerESP.HOutlineTransparency,Callback = function(Number)
+                Config.PlayerESP.HOutlineTransparency = Number
+            end})
+            ]]
         end
         local CircleSection = MainTab:AddSection({Name = "FoV Circle",Side = "Right"}) do
             CircleSection:AddToggle({Name = "Enable",Value = Config.Circle.Visible,Callback = function(Bool)
@@ -308,12 +348,7 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             OtherSection:AddSlider({Name = "Clock Time",Min = 0,Max = 24,Value = Config.EnvTime,Callback = function(Number)
                 Config.EnvTime = Number
             end})
-            --[[
-            OtherSection:AddSlider({Name = "Brightness",Min = 0,Max = 10,Value = Config.EnvBrightness,Callback = function(Number)
-                Config.EnvBrightness = Number
-            end})
-            ]]
-            OtherSection:AddSlider({Name = "Fog Density",Min = 0,Max = 1,Value = Config.EnvFog,Precise = 2,Callback = function(Number)
+            OtherSection:AddSlider({Name = "Fog Density",Min = 0,Max = 1,Precise = 2,Value = Config.EnvFog,Callback = function(Number)
                 Config.EnvFog = Number
             end})
             OtherSection:AddDivider({Text = "Weapon"})
@@ -396,8 +431,8 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
             end
         end})
         SettingsTab:AddButton({Name = "Join Discord Server",Side = "Left",Callback = function()
-            local Request = (syn and syn.request) or request
-            Request({
+            local request = (syn and syn.request) or request
+            request({
                 ["Url"] = "http://localhost:6463/rpc?v=1",
                 ["Method"] = "POST",
                 ["Headers"] = {
@@ -533,7 +568,7 @@ end
 
 -- game modules hook
 local function requireGameModule(Name)
-    for Index, Instance in pairs(getnilinstances()) do
+    for Index, Instance in pairs(getloadedmodules()) do
         if Instance.Name == Name then
             return require(Instance)
         end
@@ -749,12 +784,20 @@ if EnvironmentService and environmentOld then
 end
 
 -- silent aim hook
-local namecall
-namecall = hookmetamethod(game, "__namecall", function(self, ...)
+local __namecall
+__namecall = hookmetamethod(game, "__namecall", function(self, ...)
     local args = {...}
     if getnamecallmethod() == "Raycast" then
         if Config.SilentAim and Target then
             local Camera = Workspace.CurrentCamera
+            if args[1] == Camera.CFrame.Position then
+                args[2] = Target.Position - Camera.CFrame.Position
+            elseif AircraftTip and args[1] == AircraftTip.WorldCFrame.Position then
+                args[2] = Target.Position - AircraftTip.WorldCFrame.Position
+            elseif GroundTip and args[1] == GroundTip.WorldCFrame.Position then
+                args[2] = Target.Position - GroundTip.WorldCFrame.Position
+            end
+            --[[
             if Config.SAMode == "Gun" and args[1] == Camera.CFrame.Position then
                 args[2] = Target.Position - Camera.CFrame.Position
             elseif Config.SAMode == "Aircraft" and AircraftTip and args[1] == AircraftTip.WorldCFrame.Position then
@@ -762,9 +805,10 @@ namecall = hookmetamethod(game, "__namecall", function(self, ...)
             elseif Config.SAMode == "Turret" and GroundTip and args[1] == GroundTip.WorldCFrame.Position then
                 args[2] = Target.Position - GroundTip.WorldCFrame.Position
             end
+            ]]
         end
     end
-    return namecall(self, unpack(args))
+    return __namecall(self, unpack(args))
 end)
 
 -- circle, aim assist and misc heartbeat loop
@@ -796,11 +840,6 @@ RunService.Heartbeat:Connect(function()
 
     if Config.EnvEnable then
         Lighting.ClockTime = Config.EnvTime
-        --Lighting.Brightness = Config.EnvBrightness
-        --Lighting.Atmosphere.Density = Config.EnvFog
-    --else
-        --Lighting.Brightness = 2
-        --Lighting.Atmosphere.Density = 0.25
     end
 end)
 
