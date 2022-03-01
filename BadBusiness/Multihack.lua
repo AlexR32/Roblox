@@ -33,7 +33,7 @@ end)
 -- helpful modules
 local ESPLibrary = Debug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
 local ConfigSystem = Debug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/Cursor.lua"))()
+--loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/Cursor.lua"))()
 
 -- config system
 local function SaveConfig()
