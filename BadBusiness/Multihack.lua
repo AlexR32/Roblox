@@ -9,52 +9,31 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local Lighting = game:GetService("Lighting")
-
 local PlayerService = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+repeat task.wait() until PlayerService.LocalPlayer
 local LocalPlayer = PlayerService.LocalPlayer
-local Camera = Workspace.CurrentCamera
 
--- variables
-local Target = nil
-local Aimbot = false
+repeat task.wait() until ReplicatedStorage:FindFirstChild("TS")
+local Toroiseshell = require(ReplicatedStorage.TS)
 
--- lp check and QOT
-if not LocalPlayer then
-    --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find localplayer, making finding loop...",15,0)
-    while task.wait() do
-        if PlayerService.LocalPlayer then
-            --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> localplayer founded",15,0)
-            LocalPlayer = PlayerService.LocalPlayer
-            break
-        end
-    end
-end
+local Target, Aimbot, Debug = nil, false, false
+
 LocalPlayer.OnTeleport:Connect(function(State)
     if State == Enum.TeleportState.Started then
-        --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> queue on teleport started",15,0)
         getgenv().MultihackExecuted = false
-        local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
-        QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BadBusiness/Multihack.lua"))
-    end
-end)
-local Toroiseshell = ReplicatedStorage:FindFirstChild("TS")
-if not Toroiseshell then
-    --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> cant find enemies, making finding loop...",15,0)
-    while task.wait() do
-        if ReplicatedStorage:FindFirstChild("TS") then
-            --NotifyLib:TypeWrite("<font size=\"30\"><font color=\"rgb(252,126,63)\"><b>⚠</b></font></font> enemies founded",15,0)
-            break
+        if not Debug then
+            local QueueOnTeleport = (syn and syn.queue_on_teleport) or queue_on_teleport
+            QueueOnTeleport(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BadBusiness/Multihack.lua"))
         end
     end
-end
-Toroiseshell = require(ReplicatedStorage:FindFirstChild("TS"))
+end)
 
 -- helpful modules
-local ModulesDebug = false
-local ESPLibrary = ModulesDebug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
-local ConfigSystem = ModulesDebug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
+local ESPLibrary = Debug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
+local ConfigSystem = Debug and loadfile("Modules/ConfigSystem.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ConfigSystem.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/Cursor.lua"))()
 
 -- config system
 local function SaveConfig()
@@ -93,6 +72,11 @@ getgenv().Config = {
         HeadCircleAutoScale = true,
         HeadCircleRadius = 8,
         HeadCircleNumSides = 4,
+
+        HighlightVisible = false,
+        HTransparency = 0.5,
+        HOutlineColor = Color3.fromRGB(255,255,255),
+        HOutlineTransparency = 1,
 
         IsEnemy = false,
         TeamColor = false,
@@ -138,7 +122,7 @@ local Window = Library({Name = "Bad Business Multihack",Enabled = Config.UI.Enab
                 Config.Binds.Aimbot = Key or "NONE"
                 Aimbot = Bool
             end})
-            AimbotSection:AddToggle({Name = "Silent Aim (WIP USE AT YOUR OWN RISK)",Value = Config.SilentAim,Callback = function(Bool)
+            AimbotSection:AddToggle({Name = "Silent Aim (WIP)",Value = Config.SilentAim,Callback = function(Bool)
                 Config.SilentAim = Bool
             end}):AddBind({Key = Config.Binds.SilentAim,Mouse = true,Callback = function(Bool,Key)
                 Config.Binds.SilentAim = Key or "NONE"
@@ -197,6 +181,21 @@ local Window = Library({Name = "Bad Business Multihack",Enabled = Config.UI.Enab
             PlayerESPSection:AddSlider({Name = "NumSides",Min = 3,Max = 100,Value = Config.PlayerESP.HeadCircleNumSides,Callback = function(Number)
                 Config.PlayerESP.HeadCircleNumSides = Number
             end})
+            --[[
+            PlayerESPSection:AddDivider({Text = "Highlight (WIP)"})
+            PlayerESPSection:AddToggle({Name = "Enable",Value = Config.PlayerESP.HighlightVisible,Callback = function(Bool)
+                Config.PlayerESP.HighlightVisible = Bool
+            end})
+            PlayerESPSection:AddColorpicker({Name = "Outline Color",Color = Config.PlayerESP.HOutlineColor,Callback = function(Color)
+                Config.PlayerESP.HOutlineColor = Color
+            end})
+            PlayerESPSection:AddSlider({Name = "Transparency",Min = 0,Max = 1,Precise = 2,Value = Config.PlayerESP.HTransparency,Callback = function(Number)
+                Config.PlayerESP.HTransparency = Number
+            end})
+            PlayerESPSection:AddSlider({Name = "Outline Transparency",Min = 0,Max = 1,Precise = 2,Value = Config.PlayerESP.HOutlineTransparency,Callback = function(Number)
+                Config.PlayerESP.HOutlineTransparency = Number
+            end})
+            ]]
         end
         local CircleSection = MainTab:AddSection({Name = "FoV Circle",Side = "Right"}) do
             CircleSection:AddToggle({Name = "Enable",Value = Config.Circle.Visible,Callback = function(Bool)
