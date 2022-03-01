@@ -3,16 +3,16 @@ local RunService = game:GetService("RunService")
 
 local function AddDrawing(Type, Properties)
     local Drawing = Drawing.new(Type)
-    for Index, Property in pairs(Properties) do
-        Drawing[Index] = Property
+    for Property, Value in pairs(Properties) do
+        Drawing[Property] = Value
     end
     return Drawing
 end
 
 getgenv().CursorConfig = {
+    Enabled = true,
     Length = 16,
-    Width = 10,
-    Delete = false,
+    Width = 11,
 
     Crosshair = {
         Enabled = true,
@@ -72,19 +72,21 @@ local CrosshairB = AddDrawing("Line", {
     ZIndex = 3
 })
 
-Render = RunService.RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()
+    local CursorEnabled = CursorConfig.Enabled and UserInputService.MouseBehavior == Enum.MouseBehavior.Default
+    local CrosshairEnabled = CursorConfig.Crosshair.Enabled and UserInputService.MouseBehavior ~= Enum.MouseBehavior.Default
     local Mouse = UserInputService:GetMouseLocation()
-    UserInputService.MouseIconEnabled = false
+    --UserInputService.MouseIconEnabled = false
 
-    Cursor.Visible = true
-    CursorOutline.Visible = true
+    Cursor.Visible = CursorEnabled
+    CursorOutline.Visible = CursorEnabled
 
-    CrosshairL.Visible = true
-    CrosshairR.Visible = true
-    CrosshairT.Visible = true
-    CrosshairB.Visible = true
+    CrosshairL.Visible = CrosshairEnabled
+    CrosshairR.Visible = CrosshairEnabled
+    CrosshairT.Visible = CrosshairEnabled
+    CrosshairB.Visible = CrosshairEnabled
 
-    if UserInputService.MouseBehavior == Enum.MouseBehavior.Default then
+    if CursorConfig.Enabled then
         Cursor.PointA = Vector2.new(Mouse.X,Mouse.Y + CursorConfig.Length)
         Cursor.PointB = Vector2.new(Mouse.X,Mouse.Y)
         Cursor.PointC = Vector2.new(Mouse.X + CursorConfig.Width,Mouse.Y + CursorConfig.Width)
@@ -92,51 +94,22 @@ Render = RunService.RenderStepped:Connect(function()
         CursorOutline.PointA = Cursor.PointA + Vector2.new(0,1)
         CursorOutline.PointB = Cursor.PointB
         CursorOutline.PointC = Cursor.PointC + Vector2.new(1,0)
-
-        CrosshairL.Visible = false
-        CrosshairR.Visible = false
-        CrosshairT.Visible = false
-        CrosshairB.Visible = false
-    else
-        Cursor.Visible = false
-        CursorOutline.Visible = false
-
-        if CursorConfig.Crosshair.Enabled then
-            CrosshairL.Color = CursorConfig.Crosshair.Color
-            CrosshairL.From = Vector2.new(Mouse.X - CursorConfig.Crosshair.Gap,Mouse.Y)
-            CrosshairL.To = Vector2.new(Mouse.X - (CursorConfig.Crosshair.Size + CursorConfig.Crosshair.Gap),Mouse.Y)
-
-            CrosshairR.Color = CursorConfig.Crosshair.Color
-            CrosshairR.From = Vector2.new(Mouse.X + (CursorConfig.Crosshair.Gap + 1),Mouse.Y)
-            CrosshairR.To = Vector2.new(Mouse.X + (CursorConfig.Crosshair.Size + (CursorConfig.Crosshair.Gap + 1)),Mouse.Y)
-
-            CrosshairT.Color = CursorConfig.Crosshair.Color
-            CrosshairT.From = Vector2.new(Mouse.X,Mouse.Y - CursorConfig.Crosshair.Gap)
-            CrosshairT.To = Vector2.new(Mouse.X,Mouse.Y - (CursorConfig.Crosshair.Size + CursorConfig.Crosshair.Gap))
-
-            CrosshairB.Color = CursorConfig.Crosshair.Color
-            CrosshairB.From = Vector2.new(Mouse.X,Mouse.Y + (CursorConfig.Crosshair.Gap + 1))
-            CrosshairB.To = Vector2.new(Mouse.X,Mouse.Y + (CursorConfig.Crosshair.Size + (CursorConfig.Crosshair.Gap + 1)))
-        else
-            CrosshairL.Visible = false
-            CrosshairR.Visible = false
-            CrosshairT.Visible = false
-            CrosshairB.Visible = false
-        end
     end
+    if CursorConfig.Crosshair.Enabled then
+        CrosshairL.Color = CursorConfig.Crosshair.Color
+        CrosshairL.From = Vector2.new(Mouse.X - CursorConfig.Crosshair.Gap,Mouse.Y)
+        CrosshairL.To = Vector2.new(Mouse.X - (CursorConfig.Crosshair.Size + CursorConfig.Crosshair.Gap),Mouse.Y)
 
-    if CursorConfig.Delete then
-        Render:Disconnect()
+        CrosshairR.Color = CursorConfig.Crosshair.Color
+        CrosshairR.From = Vector2.new(Mouse.X + (CursorConfig.Crosshair.Gap + 1),Mouse.Y)
+        CrosshairR.To = Vector2.new(Mouse.X + (CursorConfig.Crosshair.Size + (CursorConfig.Crosshair.Gap + 1)),Mouse.Y)
 
-        Cursor:Remove()
-        CursorOutline:Remove()
+        CrosshairT.Color = CursorConfig.Crosshair.Color
+        CrosshairT.From = Vector2.new(Mouse.X,Mouse.Y - CursorConfig.Crosshair.Gap)
+        CrosshairT.To = Vector2.new(Mouse.X,Mouse.Y - (CursorConfig.Crosshair.Size + CursorConfig.Crosshair.Gap))
 
-        CrosshairL:Remove()
-        CrosshairR:Remove()
-        CrosshairT:Remove()
-        CrosshairB:Remove()
-
-        UserInputService.MouseIconEnabled = true
-        CursorConfig.Delete = false
+        CrosshairB.Color = CursorConfig.Crosshair.Color
+        CrosshairB.From = Vector2.new(Mouse.X,Mouse.Y + (CursorConfig.Crosshair.Gap + 1))
+        CrosshairB.To = Vector2.new(Mouse.X,Mouse.Y + (CursorConfig.Crosshair.Size + (CursorConfig.Crosshair.Gap + 1)))
     end
 end)
