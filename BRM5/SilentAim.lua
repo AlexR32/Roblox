@@ -396,6 +396,24 @@ local Window = Library({Name = "Blackhawk Rescue Mission 5 Multihack",Enabled = 
                 Window:ChangeColor(Color)
             end})
         end
+        local CursorSection = SettingsTab:AddSection({Name = "Cursor",Side = "Left"}) do
+            CursorSection:AddToggle({Name = "Enabled",Value = CursorConfig.Enabled,Callback = function(Bool) 
+                CursorConfig.Enabled = Bool
+            end})
+            CursorSection:AddDivider({Text = "Crosshair"})
+            CursorSection:AddToggle({Name = "Enabled",Value = CursorConfig.Crosshair.Enabled,Callback = function(Bool) 
+                CursorConfig.Crosshair.Enabled = Bool
+            end})
+            CursorSection:AddColorpicker({Name = "Color",Color = CursorConfig.Crosshair.Color,Callback = function(Color)
+                CursorConfig.Crosshair.Color = Color
+            end})
+            CursorSection:AddSlider({Name = "Size",Min = 1, Max = 10,Value = CursorConfig.Crosshair.Size,Callback = function(Number)
+                CursorConfig.Crosshair.Size = Number
+            end})
+            CursorSection:AddSlider({Name = "Gap",Min = 0, Max = 10,Value = CursorConfig.Crosshair.Gap,Callback = function(Number)
+                CursorConfig.Crosshair.Gap = Number
+            end})
+        end
         SettingsTab:AddButton({Name = "Server Hop",Side = "Left",Callback = function()
             -- Credits to Infinite Yield for serverhop
             local x = {}
