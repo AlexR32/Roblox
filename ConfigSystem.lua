@@ -1,21 +1,25 @@
-local ConfigSystem = {}
 local HttpService = game:GetService("HttpService")
+local ConfigSystem = {}
+
+-- super complicated config system but it fits perfectly for my ui lib
 
 local function Color3ToTable(Color3)
     return {
-        ["R"] = Color3.R,
-        ["G"] = Color3.G,
-        ["B"] = Color3.B
+        R = Color3.R,
+        G = Color3.G,
+        B = Color3.B
     }
 end
 local function TableToColor3(Table)
-    return Color3.fromRGB(Table["R"] * 255,Table["G"] * 255,Table["B"] * 255)
+    return Color3.new(
+        Table.R,
+        Table.G,
+        Table.B
+    )
 end
 
 local function EnumToTable(Enum)
-    Enum = tostring(Enum)
-    Enum = string.split(Enum, ".")
-    return Enum
+    return string.split(tostring(Enum), ".")
 end
 local function TableToEnum(Table)
     return Enum[Table[2]][Table[3]]
@@ -51,7 +55,7 @@ local function Convert(Table,Mode)
         end
     elseif Mode == "Read" then
         for Index,Value in pairs(Table) do
-            if typeof(Value) == "table" and (Value["R"] and Value["G"] and Value["B"]) then
+            if typeof(Value) == "table" and (Value.R and Value.G and Value.B) then
                 Table[Index] = TableToColor3(Value)
             elseif typeof(Value) == "table" and Value[1] == "Enum" then
                 Table[Index] = TableToEnum(Value)
@@ -60,20 +64,20 @@ local function Convert(Table,Mode)
             end
         end
     end
+    return Table
 end
-
 local function Compare(Table,Default)
     for Index,Value in pairs(Default) do
         if Table[Index] == nil then
             Table[Index] = Value
-            print(tostring(Index) .. " added to config")
+            --print(tostring(Index) .. " added to config")
         elseif typeof(Table[Index]) == "table" and typeof(Value) == "table" then
             Compare(Table[Index],Value)
         end
     end
     for Index,Value in pairs(Table) do
         if Default[Index] == nil then
-            print(tostring(Index) .. " removed from config")
+            --print(tostring(Index) .. " removed from config")
             Table[Index] = nil
         elseif typeof(Default[Index]) == "table" and typeof(Value) == "table" then
             Compare(Default[Index],Value)
@@ -82,14 +86,11 @@ local function Compare(Table,Default)
 end
 
 function ConfigSystem.WriteJSON(Table,Location)
-    if not Table and not Location then return end
     local TableCopy = ShallowCopy(Table)
     Convert(TableCopy,"Write")
     writefile(Location, HttpService:JSONEncode(TableCopy))
 end
-
 function ConfigSystem.ReadJSON(Location,Default)
-    if not Location and not Default then return end
     local Table = HttpService:JSONDecode(readfile(Location))
     Compare(Table,Default)
     Convert(Table,"Read")
