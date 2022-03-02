@@ -64,7 +64,6 @@ local function Convert(Table,Mode)
             end
         end
     end
-    return Table
 end
 local function Compare(Table,Default)
     for Index,Value in pairs(Default) do
