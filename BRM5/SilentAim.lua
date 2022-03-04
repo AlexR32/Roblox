@@ -15,10 +15,6 @@ local Lighting = game:GetService("Lighting")
 
 repeat task.wait() until PlayerService.LocalPlayer
 local LocalPlayer = PlayerService.LocalPlayer
-
-repeat task.wait() until Workspace:FindFirstChild("Enemies")
-local NPCFolder = Workspace.Enemies
-
 local Target, Aimbot, Debug, GroundTip, AircraftTip = nil, false, false, nil, nil
 
 LocalPlayer.OnTeleport:Connect(function(State)
@@ -30,6 +26,9 @@ LocalPlayer.OnTeleport:Connect(function(State)
         end
     end
 end)
+
+repeat task.wait() until Workspace:FindFirstChild("Enemies")
+local NPCFolder = Workspace.Enemies
 
 -- helpful modules
 local ESPLibrary = Debug and loadfile("Modules/ESPLibrary.lua")() or loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/ESPLibrary.lua"))()
@@ -774,8 +773,10 @@ if EnvironmentService and environmentOld then
         local args = {...}
         if Config.EnvEnable then
             args[1]._atmoshperes.Default.Density = Config.EnvFog
-            args[1]._atmoshperes.Desert.Density = Config.EnvFog
-            args[1]._atmoshperes.Snow.Density = Config.EnvFog
+            if args[1]._atmoshperes.Desert and args[1]._atmoshperes.Snow then
+                args[1]._atmoshperes.Desert.Density = Config.EnvFog
+                args[1]._atmoshperes.Snow.Density = Config.EnvFog
+            end
         end
         return environmentOld(...)
     end
