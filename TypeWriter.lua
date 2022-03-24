@@ -34,5 +34,5 @@ return function(Text,Duration,Duration2)
 			task.wait(Duration2)
 		end
 		Message:Destroy()
-	end)
+	end)()
 end
