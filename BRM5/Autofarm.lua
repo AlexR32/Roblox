@@ -1,5 +1,5 @@
 local TypeWrite = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/TypeWriter.lua"))()
-TypeWrite("AUTOFARM PATCHED\nDONT DM ME\nSOURCE CODE IN COMMENTED IN THIS SCRIPT",15)
+TypeWrite("AUTOFARM PATCHED\nDONT DM ME\nSOURCE CODE COMMENTED IN THIS SCRIPT",15)
 
 --[[
 local UserInputService = game:GetService("UserInputService")
