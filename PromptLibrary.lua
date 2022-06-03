@@ -42,7 +42,7 @@ end
 --[[
 -- Example
 local PromptLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/PromptLibrary.lua"))()
-ErrorPrompt("Hello!","Would You Like To Be My Friend?",{
+PromptLib("Hello!","Would You Like To Be My Friend?",{
     {Text = "Yes",LayoutOrder = 0,Primary = true,Callback = function()
         print(":D")
     end},
