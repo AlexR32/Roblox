@@ -14,13 +14,17 @@ local function NewScreen(ScreenName)
     return Screen
 end
 
-return function(Title,Message,Buttons)
+return function(Title,Message,Buttons,RichText)
     local Screen = NewScreen("Prompt")
     local Prompt = ErrorPrompt.new("Default",{
         MessageTextScaled = false,
         PlayAnimation = false,
         HideErrorCode = true
     })
+    if RichText then
+        Prompt._frame.MessageArea.ErrorFrame.ErrorMessage.RichText = true
+    end
+
     for Index,Button in pairs(Buttons) do
         local Old = Button.Callback
         Button.Callback = function(...)
