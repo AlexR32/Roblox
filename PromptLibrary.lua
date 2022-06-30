@@ -9,7 +9,7 @@ local function NewScreen(ScreenName)
     Screen.IgnoreGuiInset = true
     sethiddenproperty(Screen,
     "OnTopOfCoreBlur",true)
-    syn.protect_gui(Screen)
+    --syn.protect_gui(Screen)
     Screen.Parent = CoreGui
     return Screen
 end
