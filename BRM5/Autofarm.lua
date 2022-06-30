@@ -1,5 +1,8 @@
-local TypeWrite = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/TypeWriter.lua"))()
-TypeWrite("AUTOFARM PATCHED\nDONT DM ME\nSOURCE CODE COMMENTED IN THIS SCRIPT",15)
+local PromptLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/PromptLibrary.lua"))()
+PromptLib("Disconnected","You were kicked from this experience: Banned for autofarming\n(Error Code: 267)\n\n<b><font color=\"rgb(77,79,81)\">LOL TROLLED, AUTOFARM PATCHED :troll:</font></b>",{
+    {Text = "Close",LayoutOrder = 0,Primary = true,Callback = function()
+    end},
+},true)
 
 --[[
 local UserInputService = game:GetService("UserInputService")
