@@ -1,73 +1,73 @@
-local logtable = {"Remote Log Started - " .. os.date("%c")}
+local LogTable = {"Remote Log Started - " .. os.date("%c")}
+local PlayerService = game:GetService("Players")
 
-local SpecialCharacters = {
-	['\a'] = '\\a', 
-	['\b'] = '\\b', 
-	['\f'] = '\\f', 
-	['\n'] = '\\n', 
-	['\r'] = '\\r', 
-	['\t'] = '\\t', 
-	['\v'] = '\\v', 
-	['\0'] = '\\0'
-}
-local Keywords = { 
-	['and'] = true, 
-	['break'] = true, 
-	['do'] = true, 
-	['else'] = true, 
-	['elseif'] = true, 
-	['end'] = true, 
-	['false'] = true, 
-	['for'] = true, 
-	['function'] = true, 
-	['if'] = true, 
-	['in'] = true, 
-	['local'] = true, 
-	['nil'] = true, 
-	['not'] = true, 
-	['or'] = true, 
-	['repeat'] = true, 
-	['return'] = true, 
-	['then'] = true, 
-	['true'] = true, 
-	['until'] = true, 
-	['while'] = true, 
-	['continue'] = true
+local SpecialCharacters,Keywords = {
+    ['\a'] = '\\a',
+    ['\b'] = '\\b',
+    ['\f'] = '\\f',
+    ['\n'] = '\\n',
+    ['\r'] = '\\r',
+    ['\t'] = '\\t',
+    ['\v'] = '\\v',
+    ['\0'] = '\\0'
+}, {
+    ['and'] = true,
+    ['break'] = true,
+    ['do'] = true,
+    ['else'] = true,
+    ['elseif'] = true,
+    ['end'] = true,
+    ['false'] = true,
+    ['for'] = true,
+    ['function'] = true,
+    ['if'] = true,
+    ['in'] = true,
+    ['local'] = true,
+    ['nil'] = true,
+    ['not'] = true,
+    ['or'] = true,
+    ['repeat'] = true,
+    ['return'] = true,
+    ['then'] = true,
+    ['true'] = true,
+    ['until'] = true,
+    ['while'] = true,
+    ['continue'] = true
 }
 
 local function GetFullName(Object)
-	local Hierarchy = {}
+    local Hierarchy = {}
 
-	local ChainLength = 1
-	local Parent = Object
-	
-	while Parent do
-		Parent = Parent.Parent
-		ChainLength = ChainLength + 1
-	end
+    local ChainLength = 1
+    local Parent = Object
 
-	Parent = Object
-	local Num = 0
-	while Parent do
-		Num = Num + 1
+    while Parent do
+        Parent = Parent.Parent
+        ChainLength = ChainLength + 1
+    end
 
-		local ObjName = string.gsub(Parent.Name, '[%c%z]', SpecialCharacters)
-		ObjName = Parent == game and 'game' or ObjName
+    Parent = Object
+    local Num = 0
+    while Parent do
+        Num = Num + 1
 
-		if Keywords[ObjName] or not string.match(ObjName, '^[_%a][_%w]*$') then
-			ObjName = '["' .. ObjName .. '"]'
-		elseif Num ~= ChainLength - 1 then
-			ObjName = '.' .. ObjName
-		end
+        local ObjName = string.gsub(Parent.Name, '[%c%z]', SpecialCharacters)
+        ObjName = Parent == game and 'game' or ObjName
 
-		Hierarchy[ChainLength - Num] = ObjName
-		Parent = Parent.Parent
-	end
+        if Keywords[ObjName] or not string.match(ObjName, '^[_%a][_%w]*$') then
+            ObjName = '["' .. ObjName .. '"]'
+        elseif Num ~= ChainLength - 1 then
+            ObjName = '.' .. ObjName
+        end
 
-	return table.concat(Hierarchy)
+        Hierarchy[ChainLength - Num] = ObjName
+        Parent = Parent.Parent
+    end
+
+    return table.concat(Hierarchy)
 end
 
-function formatargs(args,showkeys)
+local function formatargs(args,showkeys)
     if #args == 0 then return "N/A" end
     local strargs = {}
     for k,v in next,args do
@@ -90,23 +90,27 @@ function formatargs(args,showkeys)
     return table.concat(strargs, ", ")
 end
 
-local function remotelog(self, namecallmethod, script, args)
-    table.insert(logtable, #logtable + 1, self.ClassName .. " called! - " .. os.date("%c") .. "\nPath: " .. GetFullName(self) .. "\nFrom Script: " .. GetFullName(script) .. "\nArguments: " .. formatargs(args) .. "\nRuns As: " .. GetFullName(self) .. ":" .. namecallmethod .. "(" .. formatargs(args) .. ")")
+local function RemoteLog(Self, Method, Script, Args)
+    local SelfName = GetFullName(Self)
+    local FormatedArgs = formatargs(Args)
+
+    LogTable[#LogTable + 1] = string.format("%s called! - %s\nPath: %s\nFrom Script: %s\nArguments: %s\nRuns As: %s:%s(%s)",
+        Self.ClassName,os.date("%c"),SelfName,GetFullName(Script),FormatedArgs,SelfName,Method,FormatedArgs)
 end
 
-game.Players.PlayerRemoving:Connect(function(Player)
-    if Player == game.Players.LocalPlayer then
-        table.insert(logtable, #logtable + 1, "Remote Log Ended - " .. os.date("%c"))
-        writefile("Remote Log.txt", table.concat(logtable,"\n\n"))
+PlayerService.PlayerRemoving:Connect(function(Player)
+    if Player == PlayerService.LocalPlayer then
+        LogTable[#LogTable + 1] = "Remote Log Ended - " .. os.date("%c")
+        writefile("Remote Log.txt", table.concat(LogTable,"\n\n"))
     end
 end)
 
-namecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local namecallmethod = getnamecallmethod()
-    local script = getcallingscript()
-    local args = {...}
-    if namecallmethod == "FireServer" or namecallmethod == "InvokeServer" then
-        remotelog(self, namecallmethod, script, args)
-    end
-    return namecall(self, ...)
+local OldNamecall
+OldNamecall = hookmetamethod(game, "__namecall", function(Self, ...)
+    local Method,Script,Args = getnamecallmethod(),getcallingscript(),{...}
+    if Method == "FireServer" or Method == "InvokeServer" then
+        task.spawn(function()
+            RemoteLog(Self, Method, Script, Args)
+        end)
+    end return OldNamecall(Self, ...)
 end)
